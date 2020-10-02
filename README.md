@@ -5,21 +5,21 @@ database (database and classes)
 
 &ensp;-user
 
-&emsp;user_schema.py
+&emsp;&emsp;user_schema.py
 
 &ensp;-contact
 
-&ensp; -session
+&ensp;- session
  
-&ensp; -contact
+&ensp;- contact
  
-&ensp; -event
+&ensp;- event
 
-&ensp; -organization
+&ensp;- organization
 
-&ensp; -receipt
+&ensp;- receipt
 
-&ensp; -notification
+&ensp;- notification
 
 product (API calls)
 
