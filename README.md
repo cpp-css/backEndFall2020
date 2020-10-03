@@ -3,11 +3,9 @@
 ## Directory
 database (database and classes)
 
-&ensp;-user
+&ensp;- user
 
 &emsp;&emsp;user_schema.py
-
-&ensp;-contact
 
 &ensp;- session
  
