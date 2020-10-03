@@ -7,6 +7,8 @@ database (database and classes)
 
 &emsp;&emsp;user_schema.py
 
+&emsp;&emsp;user_test.py
+
 &ensp;- session
  
 &ensp;- contact
