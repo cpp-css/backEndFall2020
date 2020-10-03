@@ -7,8 +7,6 @@ database (database and classes)
 
 &emsp;&emsp;user_schema.py
 
-&emsp;&emsp;user_test.py
-
 &ensp;- session
  
 &ensp;- contact
@@ -42,6 +40,14 @@ product (API calls)
 &emsp; user_helper.py
 
 &emsp; ...
+
+tests
+
+&ensp;- database
+
+&ensp;- api
+
+
 
 ## Write clean code:
 
