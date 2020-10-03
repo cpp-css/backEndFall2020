@@ -14,7 +14,7 @@ class Notification(db.Model):
     type = db.Column(db.Unicode(250))
     info = db.Column(db.Unicode(2500))
 
-    def __init__(self, sender_id, receiver_id, event_id, type, info, qr):
+    def __init__(self, sender_id, receiver_id, event_id, type, info):
         self.sender_id = sender_id
         self.receiver_id = receiver_id
         self.event_id = event_id
