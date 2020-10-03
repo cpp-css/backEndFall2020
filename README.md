@@ -25,19 +25,19 @@ product (API calls)
 
 &emsp; - user
 
-&emsp;&emsp;- get_apis.py
+&emsp;&emsp; get_apis.py
 
-&emsp;&emsp;- post_apis.py
+&emsp;&emsp; post_apis.py
 
-&emsp;&emsp; - put_apis.py
+&emsp;&emsp; put_apis.py
 
-&emsp;&emsp; - delete_apis.py  
+&emsp;&emsp; delete_apis.py  
 
 &emsp;...
 
 &nbsp;&nbsp; - helper_functions
 
-&emsp; - user_helper.py
+&emsp; user_helper.py
 
 &emsp; ...
 
