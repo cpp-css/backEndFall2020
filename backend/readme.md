@@ -18,7 +18,7 @@ Environment variables are handled via a `.env` file at the root of this director
 
 ## Running tests
 
-Unit tests are handled via the [python unittest library](https://docs.python.org/3/library/unittest.html "python unittest library"). To run the tests, execute the `tests.py` file. Please setup your environment variables first before running tests.
+Unit tests are handled via the [python unittest library](https://docs.python.org/3/library/unittest.html). To run the tests, execute the `tests.py` file. Please setup your environment variables first before running tests.
 
 ```
 python3 tests.py
