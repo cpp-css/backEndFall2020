@@ -1,6 +1,7 @@
 from datetime import datetime
 from config import db
 
+
 class Notification(db.Model):
     __tablename__ = 'notification'
     notification_id = db.Column(db.Integer, primary_key=True)
