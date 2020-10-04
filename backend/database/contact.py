@@ -1,15 +1,4 @@
-from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
-import os
-
-DB_PASSWORD = os.environ.get('DB_PASSWORD')
-print(DB_PASSWORD)
-app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:{pw}@localhost:5432/clubs_api'.format(pw=DB_PASSWORD)
-app.config['SQLALCHEMY_ECHO'] = True
-app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-
-db = SQLAlchemy(app)
+from config import db
 
 
 class Contact(db.Model):
@@ -29,6 +18,3 @@ class Contact(db.Model):
         self.state = state
         self.zipcode = zipcode
         self.country = country
-
-
-db.create_all()
