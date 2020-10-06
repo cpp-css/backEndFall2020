@@ -5,7 +5,7 @@ from config import db
 class Session(db.Model):
     def __gen_id(): return token_hex(16)
     
-    __tablename__ = 'session'
+    __tablename__ = 'Session'
     session_id = db.Column(db.String(32), primary_key=True, default=__gen_id)
     #user_id = db.Column(db.Integer, db.ForeignKey('user.user_id'), nullable=False)
     user_id = db.Column(db.Integer, nullable=False) # STUB
