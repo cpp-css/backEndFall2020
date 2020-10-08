@@ -1,7 +1,7 @@
 from config import db
 
 class Organization(db.Model):
-    __tablename__ = 'organization'
+    __tablename__ = 'Organization'
     organization_id = db.Column(db.Integer, primary_key = True)
     chairman_id = db.Column(db.Integer, db.ForeignKey('User.user_id'), nullable = False)
     admin_id = db.Column(db.Integer, db.ForeignKey('User.user_id'), nullable = False)
