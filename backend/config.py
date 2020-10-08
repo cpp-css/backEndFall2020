@@ -15,7 +15,6 @@ DB_HOST = os.getenv('DB_HOST')
 DB_NAME = os.getenv('DB_NAME')
 
 app = Flask("css-backend")
-
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://{user}:{pw}@{host}/{db}'.format(
     user=DB_USERNAME, pw=DB_PASSWORD, host=DB_HOST, db=DB_NAME)
 app.config['SQLALCHEMY_ECHO'] = DEBUG

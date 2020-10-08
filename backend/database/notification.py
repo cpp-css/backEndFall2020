@@ -2,7 +2,7 @@ from datetime import datetime
 from config import db
 
 class Notification(db.Model):
-    __tablename__ = 'notification'
+    __tablename__ = 'Notification'
     notification_id = db.Column(db.Integer, primary_key=True)
     #sender_id = db.Column(db.Integer, db.ForeignKey('user.user_id'), nullable=False)
     #receiver_id = db.Column(db.Integer, db.ForeignKey('user.user_id'), nullable=False)

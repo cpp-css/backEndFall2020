@@ -2,7 +2,7 @@ from datetime import datetime
 from config import db
 
 class Receipt(db.Model):
-    __tablename__ = 'receipt'
+    __tablename__ = 'Receipt'
     receipt_id = db.Column(db.Integer, primary_key=True)
     #sender_id = db.Column(db.Integer, db.ForeignKey('user.user_id'), nullable=False)
     #receiver_id = db.Column(db.Integer, db.ForeignKey('user.user_id'), nullable=False)
