@@ -5,5 +5,6 @@ from tests.database.session import SessionTest
 from tests.database.contact import ContactTest
 from tests.database.event import EventTest
 
+
 if __name__ == '__main__':
     unittest.main()
