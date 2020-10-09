@@ -1,15 +1,14 @@
 from datetime import datetime
 from config import db
+from sqlalchemy.dialects.postgresql import UUID
+import uuid
 
 class Receipt(db.Model):
     __tablename__ = 'Receipt'
-    receipt_id = db.Column(db.Integer, primary_key=True)
-    #sender_id = db.Column(db.Integer, db.ForeignKey('user.user_id'), nullable=False)
-    #receiver_id = db.Column(db.Integer, db.ForeignKey('user.user_id'), nullable=False)
-    #event_id = db.Column(db.Integer, db.ForeignKey('event.event_id'), nullable=False)
-    sender_id = db.Column(db.Integer, nullable=False) # STUB
-    receiver_id = db.Column(db.Integer, nullable=False) # STUB
-    event_id = db.Column(db.Integer, nullable=False) # STUB
+    receipt_id = db.Column(UUID(as_uuid=True), default=uuid.uuid4, primary_key=True)
+    sender_id = db.Column(UUID(as_uuid=True), db.ForeignKey('User.user_id'), nullable=False)
+    receiver_id = db.Column(UUID(as_uuid=True), db.ForeignKey('User.user_id'), nullable=False)
+    event_id = db.Column(UUID(as_uuid=True), db.ForeignKey('Event.event_id'), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     type = db.Column(db.Unicode(250))
     info = db.Column(db.Unicode(2500))
