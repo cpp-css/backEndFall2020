@@ -11,15 +11,14 @@ class OrganizationTest(unittest.TestCase):
         db.session.add(organization)
         db.session.commit()
 
-        organization = db.sessions.query(Organization).limit(1).first()
+        organization = db.session.query(Organization).limit(1).first()
 
         self.assertEqual(organization.chairman_id, 0)
         self.assertEqual(organization.admin_id, 0)
         self.assertEqual(organization.contact_id, 0)
-        self.assertEqual(organization.org_names, MAGIC_TEXT)
+        self.assertEqual(organization.org_name, MAGIC_TEXT)
         self.assertEqual(organization.categories, MAGIC_TEXT)
 
-        self.assertLess(organization.created_at, datetime.utcnow())
 
         db.session.delete(organization)
         db.session.commit()
