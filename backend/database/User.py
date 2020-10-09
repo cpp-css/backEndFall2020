@@ -1,6 +1,7 @@
 from config import db
 
 class User(db.Model):
+    __tablename__ = 'Event'
     user_id = db.Column(db.String(120), primary_key = True);
     user_password = db.Column(db.String(120), nullable=False)
     user_email = db.Column(db.String(120), unique = True, nullable=False)
