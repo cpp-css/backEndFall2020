@@ -1,0 +1,15 @@
+dist: focal
+language: python
+python:
+  - "3.8"
+services:
+  - postgresql
+install:
+  - pip install -r backend/requirements.txt
+before_script:
+  - psql -c 'create database css_backend;' -U postgres
+  - psql -c "ALTER USER postgres WITH PASSWORD 'password';" -U postgres
+  - cp backend/.env.sample backend/.env
+  - python backend/init_db.py
+script:
+  - python backend/test.py

@@ -1,14 +1,14 @@
 from datetime import datetime
 from secrets import token_hex
 from config import db
+from sqlalchemy.dialects.postgresql import UUID
 
 class Session(db.Model):
     def __gen_id(): return token_hex(16)
     
     __tablename__ = 'Session'
     session_id = db.Column(db.String(32), primary_key=True, default=__gen_id)
-    #user_id = db.Column(db.Integer, db.ForeignKey('user.user_id'), nullable=False)
-    user_id = db.Column(db.Integer, nullable=False) # STUB
+    user_id = db.Column(UUID(as_uuid=True), db.ForeignKey('User.user_id'), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     expires = db.Column(db.DateTime, nullable=False)
     
