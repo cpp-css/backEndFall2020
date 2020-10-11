@@ -12,7 +12,7 @@ class User(db.Model):
     first_name = db.Column(db.String(120), nullable=False)
     last_name = db.Column(db.String(120), nullable=False)
     registered_events = db.relationship('Event', backref='User', lazy=True)
-    notifications = db.relationship('Notification', backref='User', lazy=True)
+    notifications = db.relationship('Notification', backref='User', lazy=True, foreign_keys=['User.sender_id', 'User.receiver_id'])
     admins = db.relationship('Organization', lazy='subquery', backref=db.backref('User', lazy=True))
     sessions = db.relationship('Session', lazy='subquery', backref=db.backref('User', lazy=True))
 
