@@ -6,7 +6,7 @@ class Organization(db.Model):
     __tablename__ = 'Organization'
     organization_id = db.Column(UUID(as_uuid=True), default=uuid.uuid4, primary_key=True)
     chairman_id = db.Column(UUID(as_uuid=True), db.ForeignKey('User.user_id'), nullable=False)
-    admins = db.relationship('User', lazy='subquery', backref=db.backref('Organization', lazy=True))
+    admin_id = db.relationship('User', lazy='subquery', backref=db.backref('Organization', lazy=True))
     contact_id = db.Column(UUID(as_uuid=True), db.ForeignKey('Contact.contact_id'), nullable=False)
     org_name = db.Column(db.String(250), nullable=False)
     categories = db.Column(db.String(250), nullable=False)

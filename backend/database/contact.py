@@ -14,8 +14,8 @@ class Contact(db.Model):
     state = db.Column(db.String(10))
     zipcode = db.Column(db.Integer)
     country = db.Column(db.String(250), nullable=False)
-    event_id = db.Column(UUID(as_uuid=True), db.ForeignKey('Event.event_id'), nullable=True)
-    organization_id = db.Column(UUID(as_uuid=True), db.ForeignKey('Organization.organization_id'), nullable=False)
+    event_id = db.Column(UUID(as_uuid=True), db.ForeignKey('Event.event_id'))
+    organization_id = db.Column(UUID(as_uuid=True), db.ForeignKey('Organization.organization_id'))
 
     def __init__(self, dob, phone, address, state, zipcode, country):
         self.dob = dob
