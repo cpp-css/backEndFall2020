@@ -12,15 +12,15 @@ class User(db.Model):
     first_name = db.Column(db.String(120), nullable=False)
     last_name = db.Column(db.String(120), nullable=False)
     registered_events = db.relationship('Event', backref='User', lazy=True)
-    notifications = db.relationship('Notification', backref='User', lazy=True, foreign_keys=['User.sender_id', 'User.receiver_id'])
-    admins = db.relationship('Organization', lazy='subquery', backref=db.backref('User', lazy=True))
+    sender = db.relationship('Notification', backref='Sender', lazy=True, foreign_keys='Notification.sender_id')
+    receiver = db.relationship('Notification', backref='Receiver', lazy=True, foreign_keys='Notification.receiver_id')
+    admin = db.relationship('Organization', backref='admin', lazy=True, foreign_keys='Organization.chairman_id')
     sessions = db.relationship('Session', lazy='subquery', backref=db.backref('User', lazy=True))
+    chairman = db.relationship('Organization', backref='chairman', lazy=True, foreign_keys='Organization.chairman_id')
 
-    def __init__(self, user_id, user_password, user_email, user_role, first_name, last_name, user_contact):
-        self.user_id = user_id
-        self.password = user_password
-        self.email = user_email
-        self.role = user_role
-        self.contact_id = user_contact
+    '''def __init__(self, password, email, role, first_name, last_name):
+        self.password = password
+        self.email = email
+        self.role = role
         self.first_name = first_name
-        self.last_name = last_name
+        self.last_name = last_name'''

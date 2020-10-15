@@ -1,5 +1,55 @@
 from config import db
 from database import session, receipt, notification, contact, event, organization, user
+from datetime import datetime
 
 
-db.create_all()
+def create_db():
+    db.drop_all()
+    db.create_all()
+
+    test_contact = contact.Contact(dob=datetime.utcnow(),
+                                   phone=123456,
+                                   address="123 South st, City",
+                                   state="California",
+                                   zipcode=90732,
+                                   country="USA")
+    test_contact1 = contact.Contact(dob=datetime.utcnow(),
+                                    phone=7146523,
+                                    address="123 Harbor st, City",
+                                    state="California",
+                                    zipcode=90882,
+                                    country="USA")
+    db.session.add(test_contact)
+    db.session.add(test_contact1)
+
+    test_user = user.User(password="password",
+                          email="test@gmail.com",
+                          role="admin",
+                          first_name="Phuong",
+                          last_name="Nguyen",
+                          contact=test_contact)
+    test_user1 = user.User(password="passwordtest",
+                           email="khuong@gmail.com",
+                           role="Chairman",
+                           first_name="Khuong",
+                           last_name="Le",
+                           contact=test_contact1)
+    db.session.add(test_user)
+    db.session.add(test_user1)
+
+    test_org = organization.Organization(org_name="Computer Science Society",
+                                         categories="CS",
+                                         contact=test_contact,
+                                         chairman=test_user)
+
+    test_org1 = organization.Organization(org_name="Software Engineer Association",
+                                          categories="CS",
+                                          contact=test_contact1,
+                                          chairman=test_user1)
+    db.session.add(test_org)
+    db.session.add(test_org1)
+
+    db.session.commit()
+
+
+create_db()
