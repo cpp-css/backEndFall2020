@@ -4,6 +4,7 @@ from sqlalchemy.dialects.postgresql import UUID
 import uuid
 
 
+
 class Event(db.Model):
     __tablename__ = 'Event'
     event_id = db.Column(UUID(as_uuid=True), default=uuid.uuid4, primary_key=True)
@@ -18,7 +19,7 @@ class Event(db.Model):
     phase = db.Column(db.Integer, nullable=False)
     contact_id = db.Column(UUID(as_uuid=True), db.ForeignKey('Contact.contact_id'), nullable=False)
 
-    def __init__(self, creator_id, organization_id, start_date, end_date, theme, perks, categories, info, phase, contact_id):
+    '''def __init__(self, creator_id, organization_id, start_date, end_date, theme, perks, categories, info, phase, contact_id):
         self.creator_id = creator_id
         self.organization_id = organization_id
         self.start_date = start_date
@@ -28,5 +29,5 @@ class Event(db.Model):
         self.categories = categories
         self.info = info
         self.phase = phase
-        self.contact_id = contact_id
+        self.contact_id = contact_id'''
 

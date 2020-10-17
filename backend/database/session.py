@@ -3,6 +3,7 @@ from secrets import token_hex
 from config import db
 from sqlalchemy.dialects.postgresql import UUID
 
+
 class Session(db.Model):
     def __gen_id(): return token_hex(16)
     
