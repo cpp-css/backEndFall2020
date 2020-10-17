@@ -20,7 +20,7 @@ def requires_json(func):
     return wrapper
     
 def validate_types(expected):
-    def _validate_body(func):
+    def _validate_types(func):
         @wraps(func)
         def wrapper(body):
             # Check each type and add to invalid if not correct
@@ -41,4 +41,4 @@ def validate_types(expected):
 
             return func(**body)
         return wrapper
-    return _validate_body
+    return _validate_types
