@@ -32,8 +32,8 @@ def login(email, password):
 @validate_types({'name': str, 'email': str, 'password': str})
 def signup(name, email, password):
     # Validate name
-    min_length = 5
-    max_length = User.columns.name.type.length
+    min_length = 2
+    max_length = User.__table__.c['name'].type.length
     if (len(name) < min_length):
         return jsonify({'success': False, 'message': 'Name should be at least {0} characters long'.format(min_length)})
     if (len(name) > max_length):
