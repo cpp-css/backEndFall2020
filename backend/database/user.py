@@ -11,7 +11,7 @@ ph = PasswordHasher()
 class User(db.Model):
     __tablename__ = 'User'
     user_id = db.Column(UUID(as_uuid=True), default=uuid.uuid4, primary_key=True)
-    email = db.Column(db.Unicode(120), unique=True, nullable=False)
+    email = db.Column(db.Unicode(254), unique=True, nullable=False)
     _password = db.Column('password', db.String(255), nullable=False)
     name = db.Column(db.Unicode(120), nullable=False)
     registered_events = db.relationship('Event', backref='User', lazy=True)
