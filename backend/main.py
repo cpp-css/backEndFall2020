@@ -1,6 +1,7 @@
 import os
 from config import app, db
 import api.organization
+import api.user
 
 
 @app.route('/')
