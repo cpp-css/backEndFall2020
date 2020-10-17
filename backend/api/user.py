@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 from flask import jsonify, request
+from sqlalchemy.exc import IntegrityError
 from api.helpers import GENERIC_ERROR, requires_json, validate_types
 from config import app, db, DEBUG
 from database.user import User
@@ -28,9 +29,12 @@ def login(email, password):
 @requires_json
 @validate_types(expected={'name': str, 'email': str, 'password': str})
 def signup(name, email, password):
-    user = User(email=email, name=name, password=password)
-    db.session.add(user)
-    db.session.commit()
+    try:
+        user = User(email=email, name=name, password=password)
+        db.session.add(user)
+        db.session.commit()
+    except (IntegrityError) as ex:
+        return jsonify({'success': False, 'message': 'Email already registered'})
     
     session = Session(user_id=user.user_id, expires=datetime.now() + timedelta(days=1))
     db.session.add(session)
