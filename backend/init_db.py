@@ -4,7 +4,14 @@ from datetime import datetime
 
 
 def create_db():
-    db.drop_all()
+    db.delete(session.Session)
+    db.delete(receipt.Receipt)
+    db.delete(notification.Notification)
+    db.delete(contact.Contact)
+    db.delete(event.Event)
+    db.delete(organization.Organization)
+    db.delete(user.User)
+
     db.create_all()
 
     test_contact = contact.Contact(dob=datetime.utcnow(),
@@ -48,6 +55,12 @@ def create_db():
                                           chairman=test_user1)
     db.session.add(test_org)
     db.session.add(test_org1)
+
+    temp_id = db.session.query(user.User).first()
+    test_session = session.Session(user_id=temp_id.user_id,
+                                   expires=datetime.now())
+
+    db.session.add(test_session)
 
     db.session.commit()
 

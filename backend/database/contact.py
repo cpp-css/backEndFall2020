@@ -14,16 +14,15 @@ class Contact(db.Model):
     address = db.Column(db.String(250))
     state = db.Column(db.String(10))
     zipcode = db.Column(db.Integer)
-    country = db.Column(db.String(250), nullable=False)
-    event_id = db.Column(UUID(as_uuid=True), db.ForeignKey('Event.event_id'))
+    country = db.Column(db.String(250))
     #organization_id = db.Column(UUID(as_uuid=True), db.ForeignKey('Organization.organization_id'))
     organization = db.relationship('Organization', backref='contact', uselist=False)
-    user = db.relationship('User', backref='contact', uselist=False)
+    #user = db.relationship('User', backref='contact', uselist=False)
 
-    def __init__(self, dob, phone, address, state, zipcode, country):
+    '''def __init__(self, dob, phone, address, state, zipcode, country):
         self.dob = dob
         self.phone = phone
         self.address = address
         self.state = state
         self.zipcode = zipcode
-        self.country = country
+        self.country = country'''

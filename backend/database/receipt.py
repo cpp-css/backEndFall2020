@@ -3,6 +3,8 @@ from config import db
 from sqlalchemy.dialects.postgresql import UUID
 import uuid
 
+
+
 class Receipt(db.Model):
     __tablename__ = 'Receipt'
     receipt_id = db.Column(UUID(as_uuid=True), default=uuid.uuid4, primary_key=True)
@@ -14,10 +16,10 @@ class Receipt(db.Model):
     info = db.Column(db.Unicode(2500))
     qr = db.Column(db.Unicode(250))
 
-    def __init__(self, sender_id, receiver_id, event_id, type, info, qr):
+    '''def __init__(self, sender_id, receiver_id, event_id, type, info, qr):
         self.sender_id = sender_id
         self.receiver_id = receiver_id
         self.event_id = event_id
         self.type = type
         self.info = info
-        self.qr = qr
+        self.qr = qr'''
