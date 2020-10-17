@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 from flask import jsonify, request
-from api.helpers import GENERIC_ERROR, requires_json, validate_body
+from api.helpers import GENERIC_ERROR, requires_json, validate_types
 from config import app, db, DEBUG
 from database.user import User
 from database.session import Session
