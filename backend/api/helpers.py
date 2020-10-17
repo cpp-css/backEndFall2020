@@ -16,13 +16,13 @@ def requires_json(func):
             if (DEBUG): response['message'] = 'Request body missing'
             return jsonify(response)
             
-        return func(body)
+        return func(**body)
     return wrapper
     
 def validate_types(expected):
     def _validate_types(func):
         @wraps(func)
-        def wrapper(body):
+        def wrapper(*args, **body):
             # Check each type and add to invalid if not correct
             invalid = {}
             for key, type in expected.items():
