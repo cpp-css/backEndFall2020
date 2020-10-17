@@ -16,7 +16,7 @@ def requires_json(func):
             if (DEBUG): response['message'] = 'Request body missing'
             return jsonify(response)
             
-        return func(**body)
+        return func(**body), 400
     return wrapper
     
 def validate_types(expected):
@@ -37,7 +37,7 @@ def validate_types(expected):
                     for key, type in invalid.items():
                         response['message'] += '\'{0}\' was expected to be a {1}, '.format(key, type.__name__)
                 
-                return jsonify(response)
+                return jsonify(response), 400
 
             return func(**body)
         return wrapper

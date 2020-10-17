@@ -11,9 +11,9 @@ ph = PasswordHasher()
 class User(db.Model):
     __tablename__ = 'User'
     user_id = db.Column(UUID(as_uuid=True), default=uuid.uuid4, primary_key=True)
-    email = db.Column(db.String(120), unique=True, nullable=False)
+    email = db.Column(db.Unicode(120), unique=True, nullable=False)
     _password = db.Column('password', db.String(255), nullable=False)
-    name = db.Column(db.String(120), nullable=False)
+    name = db.Column(db.Unicode(120), nullable=False)
     registered_events = db.relationship('Event', backref='User', lazy=True)
     sender = db.relationship('Notification', backref='Sender', lazy=True, foreign_keys='Notification.sender_id')
     receiver = db.relationship('Notification', backref='Receiver', lazy=True, foreign_keys='Notification.receiver_id')
