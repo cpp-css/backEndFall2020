@@ -12,6 +12,13 @@ from database.session import Session
 @requires_json
 @validate_types({'email': str, 'password': str})
 def login(email, password):
+    try:
+        email_results = validate_email(email)
+        email = email_results.email # normalizes our email
+    except EmailNotValidError as ex:
+        # Treat verification failure as normal login failure
+        return jsonify({'success': False, 'message': 'Invalid login details'})
+    
     user = db.session.query(User).filter(User.email == email).limit(1).first()
     if (user == None or not user.verify_password(password)):
         return jsonify({'success': False, 'message': 'Invalid login details'})
