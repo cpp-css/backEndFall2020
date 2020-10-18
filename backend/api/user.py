@@ -11,7 +11,7 @@ from database.session import Session
 @app.route('/login', methods=['POST'])
 @requires_json
 @validate_types({'email': str, 'password': str})
-def login(email, password):
+def login(email, password, **kwargs):
     try:
         email_results = validate_email(email)
         email = email_results.email # normalizes our email
@@ -37,7 +37,7 @@ def login(email, password):
 @app.route('/signup', methods=['POST'])
 @requires_json
 @validate_types({'name': str, 'email': str, 'password': str})
-def signup(name, email, password):
+def signup(name, email, password, **kwargs):
     # Validate name
     min_length = 2
     max_length = User.__table__.c['name'].type.length

@@ -26,7 +26,7 @@ def validate_types(expected):
             # Check each type and add to invalid if not correct
             invalid = {}
             for key, type in expected.items():
-                if (not isinstance(body[key], type)):
+                if (not key in body or not isinstance(body[key], type)):
                     invalid[key] = type
             
             # if there's any invalid fields, respond with an error
