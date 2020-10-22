@@ -31,16 +31,10 @@ def create_db():
 
     test_user = user.User(password="password",
                           email="test@gmail.com",
-                          role="admin",
-                          first_name="Phuong",
-                          last_name="Nguyen",
-                          contact=test_contact)
+                          name="Phuong Nguyen")
     test_user1 = user.User(password="passwordtest",
                            email="khuong@gmail.com",
-                           role="Chairman",
-                           first_name="Khuong",
-                           last_name="Le",
-                           contact=test_contact1)
+                           name="Khuong Le")
     db.session.add(test_user)
     db.session.add(test_user1)
 
