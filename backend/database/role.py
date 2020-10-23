@@ -17,6 +17,9 @@ class Role(db.Model):
     organization_id = db.Column(UUID(as_uuid=True), db.ForeignKey('Organization.organization_id'), nullable=False)
     role = db.Column(db.Enum(Roles), nullable=False)
     
+    user = db.relationship('User', lazy=True)
+    organization = db.relationship('Organization', lazy=True)
+    
     @classmethod
     def schema(cls):
         class Schema(SQLAlchemySchema):

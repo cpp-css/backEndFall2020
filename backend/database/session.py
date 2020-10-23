@@ -13,7 +13,7 @@ class Session(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     expires = db.Column(db.DateTime, nullable=False)
     
-    user = db.relationship('User', backref='Session', lazy=True)
+    user = db.relationship('User', lazy=True)
     
     @classmethod
     def schema(cls):

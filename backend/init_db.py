@@ -40,15 +40,24 @@ def create_db():
 
     test_org = organization.Organization(org_name="Computer Science Society",
                                          categories="CS",
-                                         contact=test_contact,
-                                         chairman=test_user)
+                                         contact=test_contact)
 
     test_org1 = organization.Organization(org_name="Software Engineer Association",
                                           categories="CS",
-                                          contact=test_contact1,
-                                          chairman=test_user1)
+                                          contact=test_contact1)
     db.session.add(test_org)
     db.session.add(test_org1)
+    
+    test_role = role.Role(user=test_user,
+                          organization=test_org,
+                          role=role.Roles.CHAIRMAN)
+                    
+    test_role1 = role.Role(user=test_user1,
+                          organization=test_org1,
+                          role=role.Roles.CHAIRMAN)
+                
+    db.session.add(test_role)
+    db.session.add(test_role1)
 
     temp_id = db.session.query(user.User).first()
     test_session = session.Session(user_id=temp_id.user_id,
