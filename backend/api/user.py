@@ -3,10 +3,10 @@ from email_validator import validate_email, EmailNotValidError
 from flask import jsonify, request
 from sqlalchemy.exc import IntegrityError
 from zxcvbn import zxcvbn
-from api.helpers import GENERIC_ERROR, requires_json, validate_types
+from api.helpers import *
 from config import app, db, DEBUG
-from database.user import User
 from database.session import Session
+from database.user import User
 
 @app.route('/login', methods=['POST'])
 @requires_json
@@ -27,11 +27,12 @@ def login(email, password, **kwargs):
     db.session.add(session)
     db.session.commit()
     
+    session_data = session.dump()
+    
     return jsonify({
         'success': True,
         'message': '',
-        'session': session.session_id,
-        'expires': session.expires
+        'session': session_data
     })
 
 @app.route('/signup', methods=['POST'])
@@ -74,9 +75,16 @@ def signup(name, email, password, **kwargs):
     db.session.add(session)
     db.session.commit()
     
+    session_data = session.dump()
+    
     return jsonify({
         'success': True,
         'message': '',
-        'session': session.session_id,
-        'expires': session.expires
+        'session': session_data
     })
+    
+@app.route('/user/me', methods=['GET'])
+@requires_auth
+def me():
+    user_data = request.user.dump()
+    return jsonify({'success': True, 'message': '', 'user': user_data})
