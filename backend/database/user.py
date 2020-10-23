@@ -17,10 +17,12 @@ class User(db.Model):
     name = db.Column(db.Unicode(120), nullable=False)
     
     registered_events = db.relationship('Event', lazy=True)
-    sender = db.relationship('Notification', lazy=True, foreign_keys='Notification.sender_id')
-    receiver = db.relationship('Notification', lazy=True, foreign_keys='Notification.receiver_id')
-    roles = db.relationship('Role', lazy=True)
-    sessions = db.relationship('Session', lazy=True)
+    notifications_sent = db.relationship('Notification', lazy='dynamic', foreign_keys='Notification.sender_id')
+    notifications_received = db.relationship('Notification', lazy='dynamic', foreign_keys='Notification.receiver_id')
+    receipts_sent = db.relationship('Receipt', lazy='dynamic', foreign_keys='Receipt.sender_id')
+    receipts_received = db.relationship('Receipt', lazy='dynamic', foreign_keys='Receipt.receiver_id')
+    roles = db.relationship('Role', lazy='dynamic')
+    sessions = db.relationship('Session', lazy='dynamic')
 
     @classmethod
     def schema(cls):
