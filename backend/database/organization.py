@@ -1,8 +1,6 @@
 from config import db, ma
 from sqlalchemy.dialects.postgresql import UUID
 import uuid
-from database.user import User
-from database.contact import Contact
 
 
 class Organization(db.Model):
