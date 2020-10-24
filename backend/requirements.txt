@@ -4,3 +4,6 @@ Flask-Migrate==2.5.3
 Flask-SQLAlchemy==2.4.4
 flask-marshmallow==0.14.0
 python-dotenv==0.14.0
+argon2-cffi==20.1.0 
+zxcvbn==4.4.28
+email-validator==1.1.1
