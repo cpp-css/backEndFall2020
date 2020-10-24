@@ -1,4 +1,3 @@
-
 from config import app, db
 from database.organization import Organization, OrganizationSchema
 from database.session import Session
@@ -11,6 +10,18 @@ def show_all_org():
     organizations_schema = OrganizationSchema(many=True)
     result = organizations_schema.dump(organizations)
     return jsonify(result)
+
+
+@app.route('/organization/details/<path:org_name>', methods=['GET'])
+def show_org(org_name):
+    organization = Organization.query.filter_by(org_name=org_name).first()
+    if organization:
+        organization_schema = OrganizationSchema()
+        result = organization_schema.dump(organization)
+        return jsonify(result)
+    else:
+        return jsonify(success=False,
+                       message="The organization does not exists")
 
 
 @app.route('/organization/add', methods=['POST'])
@@ -40,4 +51,3 @@ def add_org():
         db.session.add(new_org)
         db.session.commit()
     return result
-
