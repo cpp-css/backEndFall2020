@@ -3,10 +3,14 @@ from email_validator import validate_email, EmailNotValidError
 from flask import jsonify, request
 from sqlalchemy.exc import IntegrityError
 from zxcvbn import zxcvbn
-from api.helpers import GENERIC_ERROR, requires_json, validate_types
+
+from api.helpers import *
 from config import app, db, DEBUG
-from database.user import User
+from database.notification import Notification
+from database.receipt import Receipt
+from database.role import Role, Roles
 from database.session import Session
+from database.user import User
 
 @app.route('/login', methods=['POST'])
 @requires_json
@@ -27,11 +31,12 @@ def login(email, password, **kwargs):
     db.session.add(session)
     db.session.commit()
     
+    session_data = session.dump()
+    
     return jsonify({
         'success': True,
         'message': '',
-        'session': session.session_id,
-        'expires': session.expires
+        'session': session_data
     })
 
 @app.route('/signup', methods=['POST'])
@@ -74,9 +79,50 @@ def signup(name, email, password, **kwargs):
     db.session.add(session)
     db.session.commit()
     
+    session_data = session.dump()
+    
     return jsonify({
         'success': True,
         'message': '',
-        'session': session.session_id,
-        'expires': session.expires
+        'session': session_data
     })
+    
+@app.route('/user/me', methods=['GET'])
+@requires_auth
+def get_me():
+    user_data = request.user.dump()
+    return jsonify({'success': True, 'message': '', 'user': user_data})
+
+@app.route('/user/me', methods=['DELETE'])
+@requires_auth
+@requires_json
+@validate_types({'password': str})
+def delete_me(password, **kwargs):
+    user = request.user
+    if not user.verify_password(password):
+        return jsonify({'success': False, 'message': 'Invalid password'})
+
+    chairman_roles = user.roles.filter(Role.role == Roles.CHAIRMAN).all()
+    if len(chairman_roles) > 0:
+        return jsonify({
+            'success': False,
+            'message': 'Please reassign the chairperson on your organizations'
+                       ' before deleting your account.'
+        })
+        
+    admin_roles = user.roles.filter(Role.role == Roles.ADMIN).all()
+    if len(admin_roles) > 0:
+        return jsonify({
+            'success': False,
+            'message': 'Please remove yourself as an administrator on your'
+                       ' organiztions before deleting your account.'
+        })
+    
+    user.notifications_received.delete()
+    user.receipts_received.delete()
+    user.sessions.delete()
+    user.roles.delete()
+    db.session.delete(user)
+    
+    db.session.commit()
+    return jsonify({'success': True, 'message': 'Account successfully deleted'})
