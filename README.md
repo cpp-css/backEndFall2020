@@ -71,11 +71,52 @@ tests
 
 - Make comments/notes as you progress
 
+## Set up the project:
+
+git clone the repo
+
+Follow this the upper website on installing packages
+
+You should have done these after the website:
+
+install / upgrade pip if needed
+
+create a virtual environment
+
+activate the env
+
+(make sure you have the correct "python" running. py or python or python3)
+
+Your dir should be: (env) yourdirectory
+
+Run: py install -r requirements.txt
+
+Run the init_db.py to initialize database
+
+Run main.py to start the server
+
 ## Set up requirements packages:
 
 Will add more into this as we go.
-- Python3
-- Flask
-- Flask-SQLAlchemy
-- PostgreSQL
-- PGAdmin4 (to look at database - not really a requirement)
+  
+Flask==1.1.2
+
+psycopg2-binary==2.8.6
+
+Flask-Migrate==2.5.3
+
+Flask-SQLAlchemy==2.4.4
+
+flask-marshmallow==0.14.0
+
+python-dotenv==0.14.0
+
+argon2-cffi==20.1.0 
+
+zxcvbn==4.4.28
+
+email-validator==1.1.1
+
+marshmallow-sqlalchemy==0.24.0
+
+marshmallow-enum==1.5.1
