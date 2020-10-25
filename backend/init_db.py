@@ -47,15 +47,15 @@ def create_db():
                                           contact=test_contact1)
     db.session.add(test_org)
     db.session.add(test_org1)
-    
+
     test_role = role.Role(user=test_user,
                           organization=test_org,
                           role=role.Roles.CHAIRMAN)
-                    
+
     test_role1 = role.Role(user=test_user1,
-                          organization=test_org1,
-                          role=role.Roles.CHAIRMAN)
-                
+                           organization=test_org1,
+                           role=role.Roles.CHAIRMAN)
+
     db.session.add(test_role)
     db.session.add(test_role1)
 

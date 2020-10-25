@@ -21,6 +21,7 @@ def show_all_org():
 @app.route('/organization/details/<path:org_id>', methods=['GET'])
 def show_org(org_id):
     """ Return a specific organization by its ID """
+    # Verify the organize exists.
     organization = Organization.query.filter_by(organization_id=org_id).first()
     if organization:
         return jsonify(success=True,
@@ -37,23 +38,26 @@ def show_org(org_id):
 @app.route('/organization/add', methods=['POST'])
 def add_org():
     """ Add new organization """
+    # Get the session by verify the token and get the user_id
     token = request.headers.get('Authorization')
     token = token.split()[1]
     sessionObj = db.session.query(Session).filter(Session.session_id == token).first()
     print("DEBUG....")
     print(sessionObj)
 
+    # Test if the organization exists.
     org_name = request.form['org_name']
     test = Organization.query.filter_by(org_name=org_name).first()
 
     if test:
         return jsonify(message='This name is already taken. Please choose another name.', success=False)
     else:
+        # Enter organization name and categories.
         org_name = request.form.get('org_name')
         categories = request.form.get('categories')
         created_date = datetime.utcnow()
 
-        # Create new contact for the organization
+        # New contact for the organization
         org_contact = Contact(dob=created_date,
                               address="3801 W Temple Ave, Pomona,",
                               state="California",
@@ -78,11 +82,36 @@ def add_org():
     return jsonify(result)
 
 
-@app.route('/organization/register', methods=['POST'])
-def register_org():
+@app.route('/organization/register/<path:org_id>', methods=['POST'])
+def register_org(org_id):
     """ User register for a organization"""
-    return jsonify(success=True,
-                   message="Registered.")
+    # Verified the organization id existed or not
+    organization = Organization.query.filter_by(organization_id=org_id).first()
+    if organization:
+        # Get the session token
+        token = request.headers.get('Authorization')
+        token = token.split()[1]
+        sessionObj = db.session.query(Session).filter(Session.session_id == token).first()
+        print("...SESSION TOKEN...")
+        print(sessionObj)
+
+        # Query the the role matches the organization and the user.
+        current_role = Role.query.filter_by(organization_id=org_id, user_id=sessionObj.user_id).first()
+        # If the user is not in the organization, create new MEMBER role for the user.
+        if current_role is None:
+            new_member = Role(user_id=sessionObj.user_id,
+                              organization=organization,
+                              role=Roles.MEMBER)
+            db.session.add(new_member)
+            db.session.commit()
+            return jsonify(success=True,
+                           message="You registered for " + organization.org_name)
+        else:
+            return jsonify(success=False,
+                           message="You already have been registered for this organization.")
+    else:
+        return jsonify(success=False,
+                       message="The organization does not exists.")
 
 
 @app.route('/organization/resign/<path:org_id>', methods=['PUT'])
@@ -118,7 +147,7 @@ def resign_role(org_id):
                                message="Cannot resign.")
         else:
             return jsonify(success=True,
-                           message="You don't have any role in this organization.")
+                           message="You are not member of this organization.")
     else:
         return jsonify(success=False,
                        message="The organization does not exists.")
