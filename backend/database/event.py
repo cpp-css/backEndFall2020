@@ -18,6 +18,10 @@ class Event(db.Model):
     info = db.Column(db.String(2500), nullable=False)
     phase = db.Column(db.Integer, nullable=False)
     contact_id = db.Column(UUID(as_uuid=True), db.ForeignKey('Contact.contact_id'), nullable=False)
+    
+    creator = db.relationship('User', lazy=True)
+    organization = db.relationship('Organization', lazy=True)
+    contact = db.relationship('Contact', lazy=True)
 
     '''def __init__(self, creator_id, organization_id, start_date, end_date, theme, perks, categories, info, phase, contact_id):
         self.creator_id = creator_id
@@ -35,3 +39,4 @@ class Event(db.Model):
 class EventSchema(ma.Schema):
     class Meta:
         fields = ('event_id', 'start_date', 'end_date', 'theme', 'perks', 'categories', 'info')
+

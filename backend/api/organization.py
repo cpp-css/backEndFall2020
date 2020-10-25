@@ -1,7 +1,11 @@
 from config import app, db
 from database.organization import Organization, OrganizationSchema
+from database.contact import Contact
+from database.user import User
+from database.role import Role, Roles
 from database.session import Session
 from flask import jsonify, request
+from datetime import datetime
 
 
 @app.route('/organization/list', methods=['GET'])
@@ -27,7 +31,7 @@ def show_org(org_id):
                        categories=organization.categories)
     else:
         return jsonify(success=False,
-                       message="The organization does not exists")
+                       message="The organization does not exists.")
 
 
 @app.route('/organization/add', methods=['POST'])
@@ -47,13 +51,29 @@ def add_org():
     else:
         org_name = request.form.get('org_name')
         categories = request.form.get('categories')
-        contact_id = request.form.get('contact_id')
+        created_date = datetime.utcnow()
+
+        # Create new contact for the organization
+        org_contact = Contact(dob=created_date,
+                              address="3801 W Temple Ave, Pomona,",
+                              state="California",
+                              zipcode=91768,
+                              country="USA")
+
+        # Create new organization
         new_org = Organization(org_name=org_name,
                                categories=categories,
-                               contact_id=contact_id,
-                               chairman_id=sessionObj.user_id)
-        result = {'message': {'org_name': org_name, 'categories': categories, 'contact_id': contact_id}, 'success': True}
+                               contact=org_contact)
+
+        # Create chairman for the organization
+        chairman = Role(user_id=sessionObj.user_id,
+                        organization=new_org,
+                        role=Roles.CHAIRMAN)
+
+        result = {'message': {'org_name': org_name, 'categories': categories},
+                  'success': True}
         db.session.add(new_org)
+        db.session.add(chairman)
         db.session.commit()
     return jsonify(result)
 
@@ -65,8 +85,40 @@ def register_org():
                    message="Registered.")
 
 
-@app.route('/organization/resign', methods=['POST'])
-def resign_role():
+@app.route('/organization/resign/<path:org_id>', methods=['PUT'])
+def resign_role(org_id):
     """ Resign admin/chairman """
-    return jsonify(success=True,
-                   message="Resigned.")
+    # Verified the organization id existed or not
+    organization = Organization.query.filter_by(organization_id=org_id).first()
+    if organization:
+        # Get the session token
+        token = request.headers.get('Authorization')
+        token = token.split()[1]
+        sessionObj = db.session.query(Session).filter(Session.session_id == token).first()
+        print("...SESSION TOKEN...")
+        print(sessionObj)
+
+        # Query the the role matches the organization and the user.
+        current_role = Role.query.filter_by(organization_id=org_id, user_id=sessionObj.user_id).first()
+        if current_role:
+            # Check if the user is chairman or admin.
+            if current_role.role == Roles.CHAIRMAN or current_role.role == Roles.ADMIN:
+                # Resign chairman or admin role by enter new chairman or admin's email.
+                new_role_email = request.form.get('email')
+                new_role = User.query.filter_by(email=new_role_email).first()
+                # Assign new chairman or admin to the organization.
+                current_role.user = new_role
+
+                db.session.commit()
+
+                return jsonify(success=True,
+                               message="Resigned.")
+            else:
+                return jsonify(success=False,
+                               message="Cannot resign.")
+        else:
+            return jsonify(success=True,
+                           message="You don't have any role in this organization.")
+    else:
+        return jsonify(success=False,
+                       message="The organization does not exists.")
