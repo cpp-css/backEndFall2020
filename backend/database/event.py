@@ -1,5 +1,5 @@
 from datetime import datetime
-from config import db, ma
+from config import db
 from sqlalchemy.dialects.postgresql import UUID
 import uuid
 
@@ -10,7 +10,6 @@ class Event(db.Model):
     event_id = db.Column(UUID(as_uuid=True), default=uuid.uuid4, primary_key=True)
     creator_id = db.Column(UUID(as_uuid=True), db.ForeignKey('User.user_id'), nullable=False)
     organization_id = db.Column(UUID(as_uuid=True), db.ForeignKey('Organization.organization_id'), nullable=False)
-    event_name = db.Column(db.String(250), nullable=False)
     start_date = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     end_date = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     theme = db.Column(db.String(250), nullable=False)
@@ -24,10 +23,9 @@ class Event(db.Model):
     organization = db.relationship('Organization', lazy=True)
     contact = db.relationship('Contact', lazy=True)
 
-    '''def __init__(self, creator_id, organization_id, event_name, start_date, end_date, theme, perks, categories, info, phase, contact_id):
+    '''def __init__(self, creator_id, organization_id, start_date, end_date, theme, perks, categories, info, phase, contact_id):
         self.creator_id = creator_id
         self.organization_id = organization_id
-        self.event_name = event_name
         self.start_date = start_date
         self.end_date = end_date
         self.theme = theme
@@ -36,7 +34,3 @@ class Event(db.Model):
         self.info = info
         self.phase = phase
         self.contact_id = contact_id'''
-
-class EventSchema(ma.Schema):
-    class Meta:
-        fields = ('event_id', 'creator_id', 'organization_id', 'event_name', 'start_date', 'end_date', 'theme', 'perks', 'categories', 'info', 'phase', 'contact_id')
