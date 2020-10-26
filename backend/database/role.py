@@ -5,10 +5,12 @@ from marshmallow_enum import EnumField
 from marshmallow_sqlalchemy import SQLAlchemySchema, auto_field
 from config import db
 
+
 class Roles(Enum):
     CHAIRMAN = 0
     ADMIN = 1
     MEMBER = 2
+
 
 class Role(db.Model):
     __tablename__ = 'Role'

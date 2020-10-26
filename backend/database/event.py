@@ -1,5 +1,5 @@
 from datetime import datetime
-from config import db
+from config import db, ma
 from sqlalchemy.dialects.postgresql import UUID
 import uuid
 
@@ -34,3 +34,9 @@ class Event(db.Model):
         self.info = info
         self.phase = phase
         self.contact_id = contact_id'''
+
+
+class EventSchema(ma.Schema):
+    class Meta:
+        fields = ('event_id', 'start_date', 'end_date', 'theme', 'perks', 'categories', 'info')
+
