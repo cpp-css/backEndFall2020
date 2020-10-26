@@ -14,3 +14,8 @@ class Role(db.Model):
     user_id = db.Column(UUID(as_uuid=True), db.ForeignKey('User.user_id'), nullable=False)
     organization_id = db.Column(UUID(as_uuid=True), db.ForeignKey('Organization.organization_id'), nullable=False)
     role = db.Column(db.Enum(Roles), nullable=False)
+
+
+class RoleSchema(ma.Schema):
+    class Meta:
+        fields = ('admins_id')
