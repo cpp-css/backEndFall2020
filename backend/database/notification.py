@@ -14,6 +14,10 @@ class Notification(db.Model):
     type = db.Column(db.Unicode(250))
     info = db.Column(db.Unicode(2500))
     read = db.Column(db.Boolean)
+    
+    sender = db.relationship('User', lazy=True, foreign_keys=[sender_id])
+    receiver = db.relationship('User', lazy=True, foreign_keys=[receiver_id])
+    event = db.relationship('Event', lazy=True)
 
     '''def __init__(self, sender_id, receiver_id, event_id, type, info):
         self.sender_id = sender_id

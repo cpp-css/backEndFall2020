@@ -1,6 +1,10 @@
 import os
 from config import app, db
 import api.organization
+import api.user
+import api.admin
+import error.http
+import error.internal
 
 
 @app.route('/')

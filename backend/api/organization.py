@@ -2,6 +2,7 @@
 from config import app, db
 from database.organization import Organization, OrganizationSchema
 from database.session import Session
+from database.user import User, UserSchema
 from flask import jsonify, request
 
 
@@ -12,6 +13,12 @@ def show_all_org():
     result = organizations_schema.dump(organizations)
     return jsonify(result)
 
+@app.route('/organization/showMembers', methods=['GET'])
+def show_all_member():
+    member = User.query.all()
+    user_schema = UserSchema(many=True)
+    result = user_schema.dump(member)
+    return jsonify(result)
 
 @app.route('/organization/add', methods=['POST'])
 def add_org():

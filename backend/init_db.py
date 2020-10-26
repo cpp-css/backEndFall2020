@@ -31,30 +31,33 @@ def create_db():
 
     test_user = user.User(password="password",
                           email="test@gmail.com",
-                          role="admin",
-                          first_name="Phuong",
-                          last_name="Nguyen",
-                          contact=test_contact)
+                          name="Phuong Nguyen")
     test_user1 = user.User(password="passwordtest",
                            email="khuong@gmail.com",
-                           role="Chairman",
-                           first_name="Khuong",
-                           last_name="Le",
-                           contact=test_contact1)
+                           name="Khuong Le")
     db.session.add(test_user)
     db.session.add(test_user1)
 
     test_org = organization.Organization(org_name="Computer Science Society",
                                          categories="CS",
-                                         contact=test_contact,
-                                         chairman=test_user)
+                                         contact=test_contact)
 
     test_org1 = organization.Organization(org_name="Software Engineer Association",
                                           categories="CS",
-                                          contact=test_contact1,
-                                          chairman=test_user1)
+                                          contact=test_contact1)
     db.session.add(test_org)
     db.session.add(test_org1)
+
+    test_role = role.Role(user=test_user,
+                          organization=test_org,
+                          role=role.Roles.CHAIRMAN)
+
+    test_role1 = role.Role(user=test_user1,
+                           organization=test_org1,
+                           role=role.Roles.CHAIRMAN)
+
+    db.session.add(test_role)
+    db.session.add(test_role1)
 
     temp_id = db.session.query(user.User).first()
     test_session = session.Session(user_id=temp_id.user_id,
@@ -62,6 +65,31 @@ def create_db():
 
     db.session.add(test_session)
 
+    test_event = event.Event(creator=test_user,
+                             organization=test_org,
+                             event_name='ADMIN',
+                             start_date=datetime.now(tz=None),
+                             end_date=datetime.now(tz=None),
+                             theme='Training',
+                             perks='Perks',
+                             categories="info",
+                             info='categories',
+                             phase=0,
+                             contact=test_contact)
+
+    test_event1 = event.Event(creator=test_user1,
+                              organization=test_org1,
+                              event_name='CHAIRMAN',
+                              start_date=datetime.now(tz=None),
+                              end_date=datetime.now(tz=None),
+                              theme='Training',
+                              perks='Perks',
+                              categories="info",
+                              info='categories',
+                              phase=0,
+                              contact=test_contact1)
+    db.session.add(test_event)
+    db.session.add(test_event1)
     db.session.commit()
 
 
