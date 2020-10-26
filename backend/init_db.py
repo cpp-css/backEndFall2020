@@ -65,7 +65,32 @@ def create_db():
 
     db.session.add(test_session)
 
-    db.session.commit()
 
+    test_event = event.Event(creator=test_user,
+                                   organization=test_org,
+                                   event_name='ADMIN',
+                                   start_date=datetime.now(tz=None),
+                                   end_date=datetime.now(tz=None),
+                                   theme='Training',
+                                   perks='Perks',
+                                   categories="info",
+                                   info='categories',
+                                   phase=0,
+                                   contact=test_contact)
+
+    test_event1 = event.Event(creator=test_user1,
+                                   organization=test_org1,
+                                   event_name='CHAIRMAN',
+                                   start_date=datetime.now(tz=None),
+                                   end_date=datetime.now(tz=None),
+                                   theme='Training',
+                                   perks='Perks',
+                                   categories="info",
+                                   info='categories',
+                                   phase=0,
+                                   contact=test_contact1)
+    db.session.add(test_event)
+    db.session.add(test_event1)
+    db.session.commit()
 
 create_db()
