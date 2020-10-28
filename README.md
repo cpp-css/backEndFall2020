@@ -75,6 +75,8 @@ tests
 
 git clone the repo
 
+https://packaging.python.org/guides/installing-using-pip-and-virtual-environments/
+
 Follow this the upper website on installing packages
 
 You should have done these after the website:
