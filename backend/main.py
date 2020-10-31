@@ -2,6 +2,7 @@ import os
 from config import app, db
 import api.organization
 import api.user
+import api.event
 import error.http
 import error.internal
 
