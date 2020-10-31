@@ -19,7 +19,8 @@ class Event(db.Model):
     info = db.Column(db.String(2500), nullable=False)
     phase = db.Column(db.Integer, nullable=False)
     contact_id = db.Column(UUID(as_uuid=True), db.ForeignKey('Contact.contact_id'), nullable=False)
-    
+    image_url = db.Column(db.String(255))
+
     creator = db.relationship('User', lazy=True)
     organization = db.relationship('Organization', lazy=True)
     contact = db.relationship('Contact', lazy=True)

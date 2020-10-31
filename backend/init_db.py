@@ -30,11 +30,13 @@ def create_db():
     db.session.add(test_contact1)
 
     test_user = user.User(password="password",
-                          email="test@gmail.com",
+                          email="phuong@cpp.edu",
                           name="Phuong Nguyen")
+
     test_user1 = user.User(password="passwordtest",
-                           email="khuong@gmail.com",
+                           email="khuong@cpp.edu",
                            name="Khuong Le")
+
     db.session.add(test_user)
     db.session.add(test_user1)
 
@@ -54,7 +56,7 @@ def create_db():
                     
     test_role1 = role.Role(user=test_user1,
                           organization=test_org1,
-                          role=role.Roles.CHAIRMAN)
+                          role=role.Roles.ADMIN)
                 
     db.session.add(test_role)
     db.session.add(test_role1)
