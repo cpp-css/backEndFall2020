@@ -2,6 +2,7 @@
 from config import app, db
 from database.organization import Organization, OrganizationSchema
 from database.session import Session
+from database.role import Role, RoleSchema
 from database.user import User, UserSchema
 from flask import jsonify, request
 
@@ -15,10 +16,25 @@ def show_all_org():
 
 @app.route('/organization/showMembers', methods=['GET'])
 def show_all_member():
-    member = User.query.all()
-    user_schema = UserSchema(many=True)
-    result = user_schema.dump(member)
-    return jsonify(result)
+    token = request.headers.get('Authorization')
+    token = token.split()[1]
+    sessionObj = db.session.query(Session).filter(Session.session_id == token).first()
+    print("DEBUG....")
+    print(sessionObj)
+
+    org_name = request.form['org_name']
+    test = Organization.query.filter_by(org_name=org_name).first()
+    print("DEBUG....")
+    print(test)
+    #this name exist -> print all member
+    if test:
+        # print all member
+        member = Role.query.all()
+        member_schema = RoleSchema(many=True)
+        result = member_schema.dump(member)
+        return jsonify(result)
+    else:  # this is not exist
+        return jsonify(message='This organization does not exist', success=False)
 
 @app.route('/organization/add', methods=['POST'])
 def add_org():

@@ -59,7 +59,7 @@ def create_db():
     db.session.add(test_role)
     db.session.add(test_role1)
 
-    temp_id = db.session.query(user.User).first()
+    temp_id = db.session.query(user.User).filter(user.User.name == "Khuong Le").first()
     test_session = session.Session(user_id=temp_id.user_id,
                                    expires=datetime.now())
 
