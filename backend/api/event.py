@@ -5,11 +5,12 @@ from database.role import Role, Roles
 from database.notification import Notification
 from database.session import Session
 from flask import jsonify, request
+from sqlalchemy import or_
 
 
 @app.route('/event/published_list', methods=['GET'])
 def show_all_published_event():
-    events = Event.query.all()
+    events = Event.query.filter(Event.phase == 1)
     events_schema = EventSchema(many=True)
     result = events_schema.dump(events)
     return jsonify(result)
@@ -17,7 +18,7 @@ def show_all_published_event():
 
 @app.route('/event/unpublished_list', methods=['GET'])
 def show_all_unpublished_event():
-    events = Event.query.all()
+    events = Event.query.filter(or_(Event.phase == 0, Event.phase == 2))
     events_schema = EventSchema(many=True)
     result = events_schema.dump(events)
     return jsonify(result)
