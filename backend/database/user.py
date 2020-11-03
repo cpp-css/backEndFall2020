@@ -19,8 +19,8 @@ class User(db.Model):
     registered_events = db.relationship('Event', lazy=True)
     notifications_sent = db.relationship('Notification', lazy='dynamic', foreign_keys='Notification.sender_id')
     notifications_received = db.relationship('Notification', lazy='dynamic', foreign_keys='Notification.receiver_id')
-    receipts_sent = db.relationship('Receipt', lazy='dynamic', foreign_keys='Receipt.sender_id')
-    receipts_received = db.relationship('Receipt', lazy='dynamic', foreign_keys='Receipt.receiver_id')
+    #registrations_sent = db.relationship('Registration', lazy='dynamic', foreign_keys='Registration.sender_id')
+    registrations_received = db.relationship('Registration', lazy='dynamic', foreign_keys='Registration.register_id')
     roles = db.relationship('Role', lazy='dynamic')
     sessions = db.relationship('Session', lazy='dynamic')
 

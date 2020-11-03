@@ -1,11 +1,11 @@
 from config import db
-from database import session, receipt, notification, contact, event, organization, user, role
+from database import session, registration, notification, contact, event, organization, user, role
 from datetime import datetime
 
 
 def create_db():
     db.delete(session.Session)
-    db.delete(receipt.Receipt)
+    db.delete(registration.Registration)
     db.delete(notification.Notification)
     db.delete(contact.Contact)
     db.delete(event.Event)

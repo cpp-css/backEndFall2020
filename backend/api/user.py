@@ -7,7 +7,7 @@ from zxcvbn import zxcvbn
 from api.helpers import *
 from config import app, db, DEBUG
 from database.notification import Notification
-from database.receipt import Receipt
+from database.registration import Registration
 from database.role import Role, Roles
 from database.session import Session
 from database.user import User
@@ -119,7 +119,7 @@ def delete_me(password, **kwargs):
         })
     
     user.notifications_received.delete()
-    user.receipts_received.delete()
+    user.registrations_received.delete()
     user.sessions.delete()
     user.roles.delete()
     db.session.delete(user)
