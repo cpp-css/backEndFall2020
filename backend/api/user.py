@@ -54,7 +54,15 @@ def signup(name, email, password, **kwargs):
     # Validate email
     try:
         email_results = validate_email(email)
-        email = email_results.email # normalizes our email
+        
+        #email = email_results.email
+        email = '{0}@{1}'.format(email_results.local_part.lower(), email_results.domain)
+        
+        if email_results.domain != 'cpp.edu':
+            return jsonify({
+                'success': False,
+                'message': 'A \'@cpp.edu\' email address is required'
+            })
     except EmailNotValidError as ex:
         return jsonify({'success': False, 'message': str(ex)})
     
