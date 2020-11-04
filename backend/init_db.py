@@ -10,6 +10,7 @@ meta = MetaData()
 
 
 def reset_db():
+    # https://github.com/pallets/flask-sqlalchemy/issues/722 reference from bryan5989 
     con = db.engine.connect()
     trans = con.begin()
     inspector = Inspector.from_engine(db.engine)
