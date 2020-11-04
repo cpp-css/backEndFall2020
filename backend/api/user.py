@@ -18,7 +18,7 @@ from database.user import User
 def login(email, password, **kwargs):
     try:
         email_results = validate_email(email)
-        email = email_results.email # normalizes our email
+        email = '{0}@{1}'.format(email_results.local_part.lower(), email_results.domain)
     except EmailNotValidError as ex:
         # Treat verification failure as normal login failure
         return jsonify({'success': False, 'message': 'Invalid login details'})
