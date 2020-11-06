@@ -7,7 +7,7 @@ from zxcvbn import zxcvbn
 from api.helpers import *
 from config import app, db, DEBUG
 from database.notification import Notification
-from database.receipt import Receipt
+from database.registration import Registration
 from database.role import Role, Roles
 from database.session import Session
 from database.user import User
@@ -18,7 +18,7 @@ from database.user import User
 def login(email, password, **kwargs):
     try:
         email_results = validate_email(email)
-        email = email_results.email # normalizes our email
+        email = '{0}@{1}'.format(email_results.local_part.lower(), email_results.domain)
     except EmailNotValidError as ex:
         # Treat verification failure as normal login failure
         return jsonify({'success': False, 'message': 'Invalid login details'})
@@ -54,7 +54,15 @@ def signup(name, email, password, **kwargs):
     # Validate email
     try:
         email_results = validate_email(email)
-        email = email_results.email # normalizes our email
+        
+        #email = email_results.email
+        email = '{0}@{1}'.format(email_results.local_part.lower(), email_results.domain)
+        
+        if email_results.domain != 'cpp.edu':
+            return jsonify({
+                'success': False,
+                'message': 'A \'@cpp.edu\' email address is required'
+            })
     except EmailNotValidError as ex:
         return jsonify({'success': False, 'message': str(ex)})
     
@@ -119,7 +127,7 @@ def delete_me(password, **kwargs):
         })
     
     user.notifications_received.delete()
-    user.receipts_received.delete()
+    user.registrations_received.delete()
     user.sessions.delete()
     user.roles.delete()
     db.session.delete(user)
