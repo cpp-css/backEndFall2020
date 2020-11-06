@@ -5,22 +5,32 @@ from database.role import Role, Roles
 from database.notification import Notification
 from database.session import Session
 from flask import jsonify, request
+from sqlalchemy import or_
 
 
 @app.route('/event/published_list', methods=['GET'])
 def show_all_published_event():
-    events = Event.query.all()
-    events_schema = EventSchema(many=True)
-    result = events_schema.dump(events)
-    return jsonify(result)
+    events = db.session.query(Event).filter(Event.phase == 1).all()
+    if events:
+        events_schema = EventSchema(many=True)
+        result = events_schema.dump(events)
+        return jsonify(result=result,
+                       success=True)
+    else:
+        return {'message': 'There is no published event.',
+                'success': False}
 
 
 @app.route('/event/unpublished_list', methods=['GET'])
 def show_all_unpublished_event():
-    events = Event.query.all()
-    events_schema = EventSchema(many=True)
-    result = events_schema.dump(events)
-    return jsonify(result)
+    events = db.session.query(Event).filter(or_(Event.phase == 0, Event.phase == 2)).all()
+    if events:
+        events_schema = EventSchema(many=True)
+        result = events_schema.dump(events)
+        return jsonify(result)
+    else:
+        return {'message': 'There is no unpublished event.',
+                'success': False}
 
 
 @app.route('/event/add/<path:org_id>', methods=['POST'])
@@ -38,7 +48,7 @@ def add_event(org_id):
 
     if roleObj.role != Roles.ADMIN:
         return {'message': 'You need to be an ADMIN in this organization to create events',
-                'success': False }
+                'success': False}
 
     input_data = request.json
 
@@ -55,8 +65,8 @@ def add_event(org_id):
         "info": input_data['info'],
         "phase": 0
     }
-    #print("DEBUG....")
-    #print(sessionObj)
+    # print("DEBUG....")
+    # print(sessionObj)
     is_event_name_exist = Event.query.filter_by(event_name=event_data['event_name']).first()
     if is_event_name_exist:
         return jsonify(message='This name is already taken. Please choose another name.', success=False)
@@ -82,3 +92,41 @@ def add_event(org_id):
     result = {'message': event_schema.dump(new_event),
               'success': True}
     return result
+
+
+@app.route('/event/delete_event/<path:event_id>', methods=['DELETE'])
+def delete_event(event_id):
+    # Verified the organization id existed or not
+    event = Event.query.filter_by(event_id=event_id).first()
+    if event:
+        # Get the session token
+        token = request.headers.get('Authorization')
+        token = token.split()[1]
+        sessionObj = db.session.query(Session).filter(Session.session_id == token).first()
+        # print("...SESSION TOKEN...")
+        # print(sessionObj)
+        role = db.session.query(Role).filter(Role.organization_id == event.organization_id, Role.user_id == sessionObj.user_id).first()
+
+        # Only chairman or admin can delete an event.
+        if role.role == Roles.CHAIRMAN or role.role == Roles.ADMIN:
+            # An event can be deleted only if it is not published.
+            if event.phase == 1:
+                return jsonify(success=False,
+                               message="The event is published so it cannot be deleted.")
+            event_name = event.event_name
+            print("*** before delete ***")
+            notifications = Notification.query.filter_by(event_id=event_id).all()
+            db.session.delete(notifications)
+            db.session.delete(event)
+
+            print("*** before commit ***")
+            db.session.commit()
+            print("*** after commit ***")
+            return jsonify(success=True,
+                           message=event_name + " is deleted.")
+        else:
+            return jsonify(success=False,
+                           message="You are not chairman or admin.")
+    else:
+        return jsonify(success=False,
+                       message="The event does not exists.")

@@ -4,7 +4,6 @@ from sqlalchemy.dialects.postgresql import UUID
 import uuid
 
 
-
 class Event(db.Model):
     __tablename__ = 'Event'
     event_id = db.Column(UUID(as_uuid=True), default=uuid.uuid4, primary_key=True)

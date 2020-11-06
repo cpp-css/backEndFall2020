@@ -161,14 +161,15 @@ def resign_role(org_id):
                 current_role.user = new_role
 
                 db.session.commit()
-
+                old_role = User.query.filter_by(user_id=sessionObj.user_id).first()  # get the old admin or chairman
+                role = str(current_role.role).split(".")[1]  # get the role for print out
                 return jsonify(success=True,
-                               message="Resigned.")
+                               message=old_role.name + " resigned. " + new_role.name + " becomes " + role + " of " + organization.org_name)
             else:
                 return jsonify(success=False,
                                message="Cannot resign.")
         else:
-            return jsonify(success=True,
+            return jsonify(success=False,
                            message="You are not member of this organization.")
     else:
         return jsonify(success=False,

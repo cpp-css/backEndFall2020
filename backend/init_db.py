@@ -33,7 +33,7 @@ def reset_db():
         tables.append(Table(table_name, meta, *fkeys))
         all_fkeys.extend(fkeys)
 
-    #drop all the constraint in the data before dropping the table
+    # drop all the constraint in the data before dropping the table
     for fkey in all_fkeys:
         con.execute(DropConstraint(fkey))
 
@@ -93,19 +93,19 @@ def create_db():
                                           contact=test_contact1)
     db.session.add(test_org)
     db.session.add(test_org1)
-    
+
     test_role = role.Role(user=test_user,
                           organization=test_org,
                           role=role.Roles.CHAIRMAN)
-                    
+
     test_role1 = role.Role(user=test_user1,
-                          organization=test_org1,
-                          role=role.Roles.CHAIRMAN)
+                           organization=test_org1,
+                           role=role.Roles.CHAIRMAN)
 
     test_role2 = role.Role(user=test_user2,
                            organization=test_org,
                            role=role.Roles.ADMIN)
-                
+
     db.session.add(test_role)
     db.session.add(test_role1)
     db.session.add(test_role2)
@@ -116,30 +116,29 @@ def create_db():
 
     db.session.add(test_session)
 
-
     test_event = event.Event(creator=test_user,
-                                   organization=test_org,
-                                   event_name='ADMIN testing',
-                                   start_date=datetime.now(tz=None),
-                                   end_date=datetime.now(tz=None),
-                                   theme='Training',
-                                   perks='Perks',
-                                   categories="info",
-                                   info='categories',
-                                   phase=0,
-                                   contact=test_contact)
+                             organization=test_org,
+                             event_name='ADMIN testing',
+                             start_date=datetime.now(tz=None),
+                             end_date=datetime.now(tz=None),
+                             theme='Training',
+                             perks='Perks',
+                             categories="info",
+                             info='categories',
+                             phase=0,
+                             contact=test_contact)
 
     test_event1 = event.Event(creator=test_user1,
-                                   organization=test_org1,
-                                   event_name='CHAIRMAN testing',
-                                   start_date=datetime.now(tz=None),
-                                   end_date=datetime.now(tz=None),
-                                   theme='Training',
-                                   perks='Perks',
-                                   categories="info",
-                                   info='categories',
-                                   phase=1,
-                                   contact=test_contact1)
+                              organization=test_org1,
+                              event_name='CHAIRMAN testing',
+                              start_date=datetime.now(tz=None),
+                              end_date=datetime.now(tz=None),
+                              theme='Training',
+                              perks='Perks',
+                              categories="info",
+                              info='categories',
+                              phase=1,
+                              contact=test_contact1)
 
     test_event2 = event.Event(creator=test_user1,
                               organization=test_org1,
