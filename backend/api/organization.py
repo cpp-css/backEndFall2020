@@ -4,6 +4,8 @@ from database.contact import Contact
 from database.user import User
 from database.role import Role, Roles
 from database.session import Session
+from database.role import Role, RoleSchema
+from database.user import User, UserSchema
 from flask import jsonify, request
 from datetime import datetime
 
@@ -34,6 +36,27 @@ def show_org(org_id):
         return jsonify(success=False,
                        message="The organization does not exists.")
 
+@app.route('/organization/showMembers', methods=['GET'])
+def show_all_member():
+    token = request.headers.get('Authorization')
+    token = token.split()[1]
+    sessionObj = db.session.query(Session).filter(Session.session_id == token).first()
+    print("DEBUG....")
+    print(sessionObj)
+
+    org_name = request.form['org_name']
+    test = Organization.query.filter_by(org_name=org_name).first()
+    print("DEBUG....")
+    print(test)
+    #this name exist -> print all member
+    if test:
+        # print all member
+        member = Role.query.all()
+        member_schema = RoleSchema(many=True)
+        result = member_schema.dump(member)
+        return jsonify(result)
+    else:  # this is not exist
+        return jsonify(message='This organization does not exist', success=False)
 
 @app.route('/organization/add', methods=['POST'])
 def add_org():
@@ -45,12 +68,17 @@ def add_org():
     #print("DEBUG....")
     #print(sessionObj)
 
+    #print(sessionObj)
+    org_name = request.form['org_name']
+    test = Organization.query.filter_by(org_name=org_name).first()
+
     # Test if the organization exists.
     input_data = request.json
     org_name = input_data['org_name']
     categories = input_data['categories']
     contact_data = input_data['contact']
     exist_name = Organization.query.filter_by(org_name=org_name).first()
+
 
     if exist_name:
         return jsonify(message='This name is already taken. Please choose another name.', success=False)
