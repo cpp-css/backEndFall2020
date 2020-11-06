@@ -30,11 +30,13 @@ def create_db():
     db.session.add(test_contact1)
 
     test_user = user.User(password="password",
-                          email="test@gmail.com",
+                          email="phuong@cpp.edu",
                           name="Phuong Nguyen")
+
     test_user1 = user.User(password="passwordtest",
-                           email="khuong@gmail.com",
+                           email="khuong@cpp.edu",
                            name="Khuong Le")
+
     db.session.add(test_user)
     db.session.add(test_user1)
 
@@ -47,15 +49,15 @@ def create_db():
                                           contact=test_contact1)
     db.session.add(test_org)
     db.session.add(test_org1)
-    
+
     test_role = role.Role(user=test_user,
                           organization=test_org,
                           role=role.Roles.CHAIRMAN)
-                    
+
     test_role1 = role.Role(user=test_user1,
-                          organization=test_org1,
-                          role=role.Roles.CHAIRMAN)
-                
+                           organization=test_org1,
+                           role=role.Roles.ADMIN)
+
     db.session.add(test_role)
     db.session.add(test_role1)
 
@@ -65,32 +67,32 @@ def create_db():
 
     db.session.add(test_session)
 
-
     test_event = event.Event(creator=test_user,
-                                   organization=test_org,
-                                   event_name='ADMIN',
-                                   start_date=datetime.now(tz=None),
-                                   end_date=datetime.now(tz=None),
-                                   theme='Training',
-                                   perks='Perks',
-                                   categories="info",
-                                   info='categories',
-                                   phase=0,
-                                   contact=test_contact)
+                             organization=test_org,
+                             event_name='ADMIN',
+                             start_date=datetime.now(tz=None),
+                             end_date=datetime.now(tz=None),
+                             theme='Training',
+                             perks='Perks',
+                             categories="info",
+                             info='categories',
+                             phase=0,
+                             contact=test_contact)
 
     test_event1 = event.Event(creator=test_user1,
-                                   organization=test_org1,
-                                   event_name='CHAIRMAN',
-                                   start_date=datetime.now(tz=None),
-                                   end_date=datetime.now(tz=None),
-                                   theme='Training',
-                                   perks='Perks',
-                                   categories="info",
-                                   info='categories',
-                                   phase=0,
-                                   contact=test_contact1)
+                              organization=test_org1,
+                              event_name='CHAIRMAN',
+                              start_date=datetime.now(tz=None),
+                              end_date=datetime.now(tz=None),
+                              theme='Training',
+                              perks='Perks',
+                              categories="info",
+                              info='categories',
+                              phase=0,
+                              contact=test_contact1)
     db.session.add(test_event)
     db.session.add(test_event1)
     db.session.commit()
+
 
 create_db()

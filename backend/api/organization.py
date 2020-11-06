@@ -27,8 +27,8 @@ def show_org(org_id):
         return jsonify(success=True,
                        org_name=organization.org_name,
                        organization_id=organization.organization_id,
-                       admin_id=organization.admin_id,
-                       chairman_id=organization.chairman_id,
+                       #admin_id=organization.admin_id,
+                       #chairman_id=organization.chairman_id,
                        categories=organization.categories)
     else:
         return jsonify(success=False,
@@ -42,27 +42,21 @@ def add_org():
     token = request.headers.get('Authorization')
     token = token.split()[1]
     sessionObj = db.session.query(Session).filter(Session.session_id == token).first()
-    print("DEBUG....")
-    print(sessionObj)
+    #print("DEBUG....")
+    #print(sessionObj)
 
     # Test if the organization exists.
-    org_name = request.form['org_name']
-    test = Organization.query.filter_by(org_name=org_name).first()
+    input_data = request.json
+    org_name = input_data['org_name']
+    categories = input_data['categories']
+    contact_data = input_data['contact']
+    exist_name = Organization.query.filter_by(org_name=org_name).first()
 
-    if test:
+    if exist_name:
         return jsonify(message='This name is already taken. Please choose another name.', success=False)
     else:
-        # Enter organization name and categories.
-        org_name = request.form.get('org_name')
-        categories = request.form.get('categories')
-        created_date = datetime.utcnow()
-
         # New contact for the organization
-        org_contact = Contact(dob=created_date,
-                              address="3801 W Temple Ave, Pomona,",
-                              state="California",
-                              zipcode=91768,
-                              country="USA")
+        org_contact = Contact(**contact_data)
 
         # Create new organization
         new_org = Organization(org_name=org_name,
@@ -73,13 +67,13 @@ def add_org():
         chairman = Role(user_id=sessionObj.user_id,
                         organization=new_org,
                         role=Roles.CHAIRMAN)
-
-        result = {'message': {'org_name': org_name, 'categories': categories},
-                  'success': True}
+        organizations_schema = OrganizationSchema()
         db.session.add(new_org)
         db.session.add(chairman)
         db.session.commit()
-    return jsonify(result)
+        result = {'message': organizations_schema.dump(new_org),
+                  'success': True}
+        return jsonify(result)
 
 
 @app.route('/organization/register/<path:org_id>', methods=['POST'])

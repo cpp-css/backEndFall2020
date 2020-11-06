@@ -13,7 +13,7 @@ class Notification(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     type = db.Column(db.Unicode(250))
     info = db.Column(db.Unicode(2500))
-    read = db.Column(db.Boolean)
+    read = db.Column(db.Boolean, default=False)
     
     sender = db.relationship('User', lazy=True, foreign_keys=[sender_id])
     receiver = db.relationship('User', lazy=True, foreign_keys=[receiver_id])

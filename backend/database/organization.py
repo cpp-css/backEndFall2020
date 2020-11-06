@@ -1,5 +1,6 @@
 from config import db, ma
 from sqlalchemy.dialects.postgresql import UUID
+from datetime import datetime
 import uuid
 
 
@@ -9,7 +10,8 @@ class Organization(db.Model):
     contact_id = db.Column(UUID(as_uuid=True), db.ForeignKey('Contact.contact_id'), nullable=False)
     org_name = db.Column(db.String(250), nullable=False)
     categories = db.Column(db.String(250), nullable=False)
-    
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+
     contact = db.relationship('Contact', lazy=True, foreign_keys=contact_id)
     members = db.relationship('Role', lazy='dynamic')
 
