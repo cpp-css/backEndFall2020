@@ -1,72 +1,66 @@
-
 from config import app, db
 from database.organization import Organization
 from database.role import Role, Roles
 from database.user import User, UserSchema
 from database.session import Session
 from flask import jsonify, request
+from sqlalchemy import or_
 
 
-@app.route('/admins/list', methods=['GET'])
-def show_all_admins():
+@app.route('/organization/organizer/<path:org_id>', methods=['GET'])
+def show_board(org_id):
     """ Search in role, if role  = 1 is admins, else skip. Print all admins out"""
-    admins = Role.query.all()
-    role_schema = RoleSchema()
-    result = role_schema.dump(admins)
-    return jsonify(result)
+    all_roles = Role.query.filter(Role.organization_id == org_id,
+                                     or_(Role.role == Roles.ADMIN, Role.role == Roles.CHAIRMAN)).all()
+    result = []
+    for eachRole in all_roles:
+        user_name = User.query.filter(User.user_id == eachRole.user_id).first()
+        data = {
+            'name': user_name.name,
+            'role': str(eachRole.role).split(".")[1]
+        }
+        result.append(data)
+        print("DEBUG", result)
+    return jsonify({"success": True, "board": result})
 
 
-@app.route('/admins/make_admin', methods=['POST'])
-def make_admin():
+@app.route('/organization/make_admin/<path:org_id>', methods=['POST'])
+def make_admin(org_id):
     token = request.headers.get('Authorization')
     token = token.split()[1]
     sessionObj = db.session.query(Session).filter(Session.session_id == token).first()
-    creator_id = sessionObj.user_id
+    current_role = Role.query.filter_by(organization_id=org_id, user_id=sessionObj.user_id).first()
     print("DEBUG....")
-    print(sessionObj)
+    print(current_role)
+    if not current_role:
+        return jsonify(message='You do not allow to do anything', success=False)
+    else:
+        # Check if the user is chairman or admin.
+        if current_role.role == Roles.CHAIRMAN:
+            input_data = request.json
+            new_role_email = input_data['email']
+            new_user = User.query.filter_by(email=new_role_email).first()
+            # check if the new_user is already in board
+            board_role = Role.query.filter(Role.user_id == new_user.user_id,
+                                           Role.organization_id == org_id,
+                                           Role.role != Roles.MEMBER).first()
+            # 1 ADMIN -> board_role not None
+            # 2 CHAIRMAN -> board_role not None
+            # MEMBER or out side -> can able to make admin
+            if board_role:
+                return jsonify(message='New user is already on board', success=False)
 
-    organization_id = request.form['organization_id']
-    print("DEBUG....line 31")
-    print(creator_id)
-    print(organization_id)
-    # check the creator_id is the person created this organization id
-    roleObject = db.session.query(Role).filter(Role.user_id == creator_id,
-                                               Role.organization_id == organization_id).first()
-    print("DEBUG.... line 33")
-    print(roleObject)
-
-    if roleObject.role != Roles.CHAIRMAN:  # this is not a chairnman
-        return jsonify(message='You do not allow to make admin', success=False)
-    else:  # this is a chairman
-        email = request.form['email']
-        user_object = User.query.filter_by(email=email).first()  # dictionary
-        # check if this person has user id in organization
-        newAdminRole = db.session.query(Role).filter(Role.user_id == user_object.user_id,
-                                                     Role.organization_id == organization_id).first()
-        print("DEBUG.... line 42")
-        print(newAdminRole)
-        # the person not in the organization -> add this user into organization and set rule is admin
-        if not newAdminRole:
-            user_id_input = user_object.user_id
-            organization_id_input = organization_id
-            role_input = Roles.ADMIN
-            new_admin = Role(user_id=user_id_input,
-                             organization_id=organization_id_input,
-                             role=role_input)
-            result = {'message': {'User_id': user_id_input, 'organization': organization_id_input, 'role': role_input},
+            new_admin = Role(user_id=new_user.user_id,
+                             organization_id=org_id,
+                             role=Roles.ADMIN)
+            result = {'message': new_user.name + " is our new Admin",
                       'success': True}
-            print("New user have been added and set to be admin")
             db.session.add(new_admin)
             db.session.commit()
             return jsonify(result)
         else:
-            # this user is in the organization
-            if newAdminRole.role == Roles.ADMIN:
-                return jsonify(message='This user is already admin of the organization', success=False)
-            else:
-                newAdminRole.role = Roles.ADMIN
-                print(newAdminRole.role)
-                return jsonify(message='Change the role of this member to be admin', success=False)
+            return jsonify(message='You do not allow to make admin', success=False)
+
 
 
 @app.route('/admins/remove_admin1', methods=['POST'])
@@ -74,38 +68,24 @@ def remove_admin():
     token = request.headers.get('Authorization')
     token = token.split()[1]
     sessionObj = db.session.query(Session).filter(Session.session_id == token).first()
-    creator_id = sessionObj.user_id
+    current_role = Role.query.filter_by(organization_id=org_id, user_id=sessionObj.user_id).first()
     print("DEBUG....")
-    print(sessionObj)
-
-    organization_id = request.form['organization_id']
-    print("DEBUG....line 31")
-    print(creator_id)
-    print(organization_id)
-    # check the creator_id is the person created this organization id
-    roleObject = db.session.query(Role).filter(Role.user_id == creator_id,
-                                               Role.organization_id == organization_id).first()
-    print("DEBUG.... line 33")
-    print(roleObject)
-
-    if roleObject.role != Roles.CHAIRMAN:  # this is not a chairnman
-        return jsonify(message='You do not allow to remove admin', success=False)
-    else:  # this is a chairman
-        email = request.form['email']
-        user_object = User.query.filter_by(email=email).first()  # dictionary
-        #check if this person has user id in organization
-        newAdminRole = db.session.query(Role).filter(Role.user_id == user_object.user_id,
-                                                     Role.organization_id == organization_id).first()
-        print("DEBUG.... line 42")
-        print(newAdminRole)
-        # the person not in the organization -> return error
-        if not newAdminRole:
-            return jsonify(message='This user is not in the organization', success=False)
+    print(current_role)
+    if not current_role:
+        return jsonify(message='You do not allow to do anything', success=False)
+    else:
+        # Check if the user is chairman or admin.
+        if current_role.role == Roles.CHAIRMAN:
+            input_data = request.json
+            new_role_email = input_data['email']
+            new_user = User.query.filter_by(email=new_role_email).first()
+            new_admin = Role(user_id=new_user.user_id,
+                             organization_id=org_id,
+                             role=Roles.ADMIN)
+            result = {'message': new_user.name + " is our new Admin",
+                      'success': True}
+            db.session.add(new_admin)
+            db.session.commit()
+            return jsonify(result)
         else:
-            #this user is in the organization
-            if newAdminRole.role == Roles.ADMIN:
-                newAdminRole.role = Roles.MEMBER
-                db.session.commit()
-                return jsonify(message='This user is admin of the organization. Remove role completely -> this user role change to member', success=True)
-            else:
-                return jsonify(message='This user is not ADMIN. Cannot remove Admin !!!', success=False)
+            return jsonify(message='You do not allow to make admin', success=False)

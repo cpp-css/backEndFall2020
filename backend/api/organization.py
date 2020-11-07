@@ -36,6 +36,7 @@ def show_org(org_id):
         return jsonify(success=False,
                        message="The organization does not exists.")
 
+
 @app.route('/organization/showMembers', methods=['GET'])
 def show_all_member():
     token = request.headers.get('Authorization')
@@ -58,6 +59,7 @@ def show_all_member():
     else:  # this is not exist
         return jsonify(message='This organization does not exist', success=False)
 
+
 @app.route('/organization/add', methods=['POST'])
 def add_org():
     """ Add new organization """
@@ -68,17 +70,12 @@ def add_org():
     #print("DEBUG....")
     #print(sessionObj)
 
-    #print(sessionObj)
-    org_name = request.form['org_name']
-    test = Organization.query.filter_by(org_name=org_name).first()
-
     # Test if the organization exists.
     input_data = request.json
     org_name = input_data['org_name']
     categories = input_data['categories']
     contact_data = input_data['contact']
     exist_name = Organization.query.filter_by(org_name=org_name).first()
-
 
     if exist_name:
         return jsonify(message='This name is already taken. Please choose another name.', success=False)
@@ -136,8 +133,8 @@ def register_org(org_id):
                        message="The organization does not exists.")
 
 
-@app.route('/organization/resign/<path:org_id>', methods=['PUT'])
-def resign_role(org_id):
+@app.route('/organization/resign/<path:org_id>', methods=['DELETE'])
+def unregister_org(org_id):
     """ Resign admin/chairman """
     # Verified the organization id existed or not
     organization = Organization.query.filter_by(organization_id=org_id).first()
@@ -153,7 +150,7 @@ def resign_role(org_id):
         current_role = Role.query.filter_by(organization_id=org_id, user_id=sessionObj.user_id).first()
         if current_role:
             # Check if the user is chairman or admin.
-            if current_role.role == Roles.CHAIRMAN or current_role.role == Roles.ADMIN:
+            if current_role.role == Roles.CHAIRMAN:
                 # Resign chairman or admin role by enter new chairman or admin's email.
                 new_role_email = request.form.get('email')
                 new_role = User.query.filter_by(email=new_role_email).first()
@@ -165,9 +162,11 @@ def resign_role(org_id):
                 role = str(current_role.role).split(".")[1]  # get the role for print out
                 return jsonify(success=True,
                                message=old_role.name + " resigned. " + new_role.name + " becomes " + role + " of " + organization.org_name)
-            else:
-                return jsonify(success=False,
-                               message="Cannot resign.")
+            else: # ADMIN OR TEAM MEMBERS
+                db.session.delete(current_role)
+                db.session.commit()
+                return jsonify(success=True,
+                               message="We will miss you.")
         else:
             return jsonify(success=False,
                            message="You are not member of this organization.")
