@@ -2,6 +2,7 @@ from config import app, db
 from datetime import datetime
 from database.event import Event, EventSchema
 from database.role import Role, Roles
+from database.user import User
 from database.registration import Registration, RegistrationSchema
 from database.notification import Notification
 from database.session import Session
@@ -11,7 +12,7 @@ from sqlalchemy import or_
 
 
 @app.route('/event/published_list', methods=['GET'])
-def show_all_published_event():
+def get_all_published_event():
     events = db.session.query(Event).filter(Event.phase == 1).all()
     if events:
         events_schema = EventSchema(many=True)
@@ -24,7 +25,7 @@ def show_all_published_event():
 
 
 @app.route('/event/unpublished_list', methods=['GET'])
-def show_all_unpublished_event():
+def get_all_unpublished_event():
     events = db.session.query(Event).filter(or_(Event.phase == 0, Event.phase == 2)).all()
     if events:
         events_schema = EventSchema(many=True)
@@ -150,7 +151,7 @@ def register_event(event_id):
         #print("...SESSION TOKEN...")
         #print(sessionObj)
         register_id = sessionObj.user_id
-        exist_register = Registration.query.filter_by(event_id = event_obj.event_id, register_id= register_id).first()
+        exist_register = Registration.query.filter_by(event_id=event_obj.event_id, register_id=register_id).first()
         if exist_register:
             return jsonify(success=False,
                            message="You already have been registered for this event.")
@@ -165,12 +166,18 @@ def register_event(event_id):
 
 @app.route('/event/participants/<path:event_id>', methods=['GET'])
 def get_all_participants(event_id):
-    participants = Registration.query.filter_by(event_id=event_id).all()
-    if participants:
-        participants_schema = RegistrationSchema(many=True)
-        result = participants_schema.dump(participants)
-        return jsonify(success=True,
-                       result=result)
-    else:
+    registers = Registration.query.filter_by(event_id=event_id).all()
+    if not registers or registers is None:
         return {'message': 'There is no participant.',
                 'success': False}
+    else:
+        participants = []
+        for register in registers:
+            register_obj = db.session.query(User).filter(User.user_id == register.register_id).first()
+            data = {
+                'name': register_obj.name,
+                'user_id': register.register_id
+            }
+            participants.append(data)
+        return jsonify({'success': True, 'message': 'Show all participants', 'participants': participants})
+
