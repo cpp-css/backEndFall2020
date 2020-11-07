@@ -162,3 +162,47 @@ def register_event(event_id):
             db.session.commit()
             return jsonify(success=True,
                            message="You registered for " + event_obj.event_name)
+
+        
+@app.route('/event/approve/<path:event_id>', methods=['PUT'])
+def approve_event(event_id):
+    token = request.headers.get('Authorization')
+    token = token.split()[1]
+    sessionObj = db.session.query(Session).filter(Session.session_id == token).first()
+    creator_id = sessionObj.user_id
+
+    roleObj = db.session.query(Role).filter(Role.user_id == creator_id,
+                                            Role.organization_id == org_id).first()
+    if roleObj is None or not roleObj:
+        return {'message': "You do not have any role in this organization",
+                'success': False}
+
+    if roleObj.role != Roles.CHAIRMAN:
+        return {'message': 'You need to be an CHAIRMAN in this organization to approve events',
+                'success': False}
+
+    userObj = sessionObj.user
+    orgObj = roleObj.organization
+    contact = orgObj.contact
+
+    eventObj = db.session.query(Event).filter(Event.event_id == event_id).first()
+
+    eventObj.phase = 1
+
+    db.session.commit()
+
+    notification_data = {
+        "sender": creator_id,
+        "receiver": eventObj.creator_id,
+        "info": "EVENT approved"
+    }
+
+    notify_chairman = Notification(**notification_data)
+    db.session.add(notify_chairman)
+    db.session.commit()
+    event_schema = EventSchema()
+
+    result = {'message': event_schema.dump(eventObj),
+              'success': True}
+
+    return result
