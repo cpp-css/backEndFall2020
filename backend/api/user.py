@@ -11,6 +11,8 @@ from database.registration import Registration
 from database.role import Role, Roles
 from database.session import Session
 from database.user import User
+from database.organization import Organization, OrganizationSchema
+from database.event import Event
 
 @app.route('/login', methods=['POST'])
 @requires_json
@@ -101,6 +103,7 @@ def get_me():
     user_data = request.user.dump()
     return jsonify({'success': True, 'message': '', 'user': user_data})
 
+
 @app.route('/user/me', methods=['DELETE'])
 @requires_auth
 @requires_json
@@ -134,3 +137,36 @@ def delete_me(password, **kwargs):
     
     db.session.commit()
     return jsonify({'success': True, 'message': 'Account successfully deleted'})
+
+
+@app.route('/user/organizations', methods=['GET'])
+@requires_auth
+def get_registered_orgs():
+    user_data = request.user.dump()
+    for eachRole in user_data['roles']:
+        organization_obj = db.session.query(Organization)\
+                                      .filter(Organization.organization_id == eachRole['organization_id']).first()
+        eachRole['organization_name'] = organization_obj.org_name
+    return jsonify({'success': True, 'message': 'show my registered organization', 'role': user_data['roles']})
+
+
+@app.route('/user/events', methods=['GET'])
+@requires_auth
+def get_registered_events():
+    token = request.headers.get('Authorization')
+    token = token.split()[1]
+    session_obj = db.session.query(Session).filter(Session.session_id == token).first()
+    curr_user = session_obj.user_id
+    register_obj = db.session.query(Registration).filter(Registration.register_id == curr_user).all()
+    #print("...DEBUGGING...")
+    #print(register_obj)
+    events = []
+    for registered in register_obj:
+        event_obj = db.session.query(Event).filter(Event.event_id == registered.event_id).first()
+        data = {
+            'event_id': registered.event_id,
+            'event_name': event_obj.event_name,
+            'created_at': registered.created_at
+        }
+        events.append(data)
+    return jsonify({'success': True, 'message': 'show my registered events', 'events': events})

@@ -16,7 +16,7 @@ class Contact(db.Model):
     zipcode = db.Column(db.Integer)
     country = db.Column(db.String(250))
     organization_id = db.Column(UUID(as_uuid=True), db.ForeignKey('Organization.organization_id'))
-    
+
     organization = db.relationship('Organization', lazy=True, foreign_keys=organization_id)
 
     '''def __init__(self, dob, phone, address, state, zipcode, country):

@@ -2,6 +2,7 @@ from config import app, db
 from datetime import datetime
 from database.event import Event, EventSchema
 from database.role import Role, Roles
+from database.registration import Registration, RegistrationSchema
 from database.notification import Notification
 from database.session import Session
 from database.registration import Registration, RegistrationSchema
@@ -36,7 +37,7 @@ def show_all_unpublished_event():
 
 
 @app.route('/event/add/<path:org_id>', methods=['POST'])
-def add_event(org_id):
+def create_event(org_id):
     token = request.headers.get('Authorization')
     token = token.split()[1]
     sessionObj = db.session.query(Session).filter(Session.session_id == token).first()
@@ -44,13 +45,17 @@ def add_event(org_id):
 
     roleObj = db.session.query(Role).filter(Role.user_id == creator_id,
                                             Role.organization_id == org_id).first()
-    userObj = sessionObj.user
-    orgObj = roleObj.organization
-    contact = orgObj.contact
+    if roleObj is None or not roleObj:
+        return {'message': "You do not have any role in this organization",
+                'success': False}
 
     if roleObj.role != Roles.ADMIN:
         return {'message': 'You need to be an ADMIN in this organization to create events',
                 'success': False}
+
+    userObj = sessionObj.user
+    orgObj = roleObj.organization
+    contact = orgObj.contact
 
     input_data = request.json
 
@@ -82,8 +87,7 @@ def add_event(org_id):
     notification_data = {
         "sender": userObj,
         "receiver": chairmanObj.user,
-        "event": new_event,
-        "info": "A new event has been created"
+        "info": "EVENT created"
     }
 
     notify_chairman = Notification(**notification_data)
@@ -100,33 +104,63 @@ def add_event(org_id):
 def delete_event(event_id):
     # Verified the organization id existed or not
     event = Event.query.filter_by(event_id=event_id).first()
-    if event:
+    if event is None or not event:
+        return jsonify(success=False,
+                       message="The event does not exists.")
+    else:
         # Get the session token
         token = request.headers.get('Authorization')
         token = token.split()[1]
         sessionObj = db.session.query(Session).filter(Session.session_id == token).first()
         # print("...SESSION TOKEN...")
         # print(sessionObj)
-        role = db.session.query(Role).filter(Role.organization_id == event.organization_id,
-                                             Role.user_id == sessionObj.user_id).first()
-
+        user_role = db.session.query(Role).filter(Role.organization_id == event.organization_id,
+                                                  Role.user_id == sessionObj.user_id).first()
         # Only chairman or admin can delete an event.
-        if role.role == Roles.CHAIRMAN or role.role == Roles.ADMIN:
+        if user_role.role == Roles.CHAIRMAN or user_role.role == Roles.ADMIN:
             # An event can be deleted only if it is not published.
             if event.phase == 1:
                 return jsonify(success=False,
                                message="The event is published so it cannot be deleted.")
-            event_name = event.event_name
+
+            #notifications = Notification.query.filter_by(event_id=event_id).all()
+            #db.session.delete(notifications)
+
             db.session.delete(event)
             db.session.commit()
             return jsonify(success=True,
-                           message=event_name + " is deleted.")
+                           message= event.event_name + " is deleted.")
         else:
             return jsonify(success=False,
                            message="You are not chairman or admin.")
-    else:
+
+
+@app.route('/event/register/<path:event_id>', methods=['POST'])
+def register_event(event_id):
+    """ User register for a organization"""
+    # Verified the organization id existed or not
+    event_obj = Event.query.filter_by(event_id=event_id).first()
+    if not event_obj or event_obj is None or event_obj.phase == 0 or event_obj.phase == 2:
         return jsonify(success=False,
                        message="The event does not exists.")
+    else:
+        token = request.headers.get('Authorization')
+        token = token.split()[1]
+        sessionObj = db.session.query(Session).filter(Session.session_id == token).first()
+        #print("...SESSION TOKEN...")
+        #print(sessionObj)
+        register_id = sessionObj.user_id
+        exist_register = Registration.query.filter_by(event_id = event_obj.event_id, register_id= register_id).first()
+        if exist_register:
+            return jsonify(success=False,
+                           message="You already have been registered for this event.")
+        else:
+            new_registration = Registration(register_id=register_id,
+                                            event_id=event_obj.event_id)
+            db.session.add(new_registration)
+            db.session.commit()
+            return jsonify(success=True,
+                           message="You registered for " + event_obj.event_name)
 
 
 @app.route('/event/participants/<path:event_id>', methods=['GET'])

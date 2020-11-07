@@ -31,4 +31,4 @@ class Registration(db.Model):
 
 class RegistrationSchema(ma.Schema):
     class Meta:
-        fields = ('registration_id', 'register_id', 'event_id', 'created_at', 'type', 'info', 'qr')
+        fields = ('registration_id', 'register_id', 'event_id', 'created_at', 'type')
