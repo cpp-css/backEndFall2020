@@ -4,6 +4,7 @@ from database.event import Event, EventSchema
 from database.role import Role, Roles
 from database.notification import Notification
 from database.session import Session
+from database.registration import Registration, RegistrationSchema
 from flask import jsonify, request
 from sqlalchemy import or_
 
@@ -27,7 +28,8 @@ def show_all_unpublished_event():
     if events:
         events_schema = EventSchema(many=True)
         result = events_schema.dump(events)
-        return jsonify(result)
+        return jsonify(result=result,
+                       success=True)
     else:
         return {'message': 'There is no unpublished event.',
                 'success': False}
@@ -105,7 +107,8 @@ def delete_event(event_id):
         sessionObj = db.session.query(Session).filter(Session.session_id == token).first()
         # print("...SESSION TOKEN...")
         # print(sessionObj)
-        role = db.session.query(Role).filter(Role.organization_id == event.organization_id, Role.user_id == sessionObj.user_id).first()
+        role = db.session.query(Role).filter(Role.organization_id == event.organization_id,
+                                             Role.user_id == sessionObj.user_id).first()
 
         # Only chairman or admin can delete an event.
         if role.role == Roles.CHAIRMAN or role.role == Roles.ADMIN:
@@ -114,14 +117,8 @@ def delete_event(event_id):
                 return jsonify(success=False,
                                message="The event is published so it cannot be deleted.")
             event_name = event.event_name
-            print("*** before delete ***")
-            notifications = Notification.query.filter_by(event_id=event_id).all()
-            db.session.delete(notifications)
             db.session.delete(event)
-
-            print("*** before commit ***")
             db.session.commit()
-            print("*** after commit ***")
             return jsonify(success=True,
                            message=event_name + " is deleted.")
         else:
@@ -130,3 +127,16 @@ def delete_event(event_id):
     else:
         return jsonify(success=False,
                        message="The event does not exists.")
+
+
+@app.route('/event/participants/<path:event_id>', methods=['GET'])
+def get_all_participants(event_id):
+    participants = Registration.query.filter_by(event_id=event_id).all()
+    if participants:
+        participants_schema = RegistrationSchema(many=True)
+        result = participants_schema.dump(participants)
+        return jsonify(success=True,
+                       result=result)
+    else:
+        return {'message': 'There is no participant.',
+                'success': False}

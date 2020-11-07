@@ -1,5 +1,5 @@
 from datetime import datetime
-from config import db
+from config import db, ma
 from sqlalchemy.dialects.postgresql import UUID
 import uuid
 
@@ -27,3 +27,8 @@ class Registration(db.Model):
         self.type = type
         self.info = info
         self.qr = qr'''
+
+
+class RegistrationSchema(ma.Schema):
+    class Meta:
+        fields = ('registration_id', 'register_id', 'event_id', 'created_at', 'type', 'info', 'qr')

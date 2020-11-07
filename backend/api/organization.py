@@ -10,6 +10,7 @@ from datetime import datetime
 
 @app.route('/organization/list', methods=['GET'])
 def show_all_org():
+def show_all_org():
     """ Return all organizations """
     organizations = Organization.query.all()
     organizations_schema = OrganizationSchema(many=True)

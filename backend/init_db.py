@@ -154,6 +154,8 @@ def create_db():
     db.session.add(test_event)
     db.session.add(test_event1)
     db.session.add(test_event2)
+
+
     db.session.commit()
 
 
