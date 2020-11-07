@@ -116,6 +116,46 @@
 					"response": []
 				},
 				{
+					"name": "get_user_org",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{endpoint}}/user/organizations",
+							"host": [
+								"{{endpoint}}"
+							],
+							"path": [
+								"user",
+								"organizations"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get_user_events",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": ""
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "unregister_org",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": ""
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "delete_me",
 					"request": {
 						"auth": {
@@ -254,6 +294,77 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "show_board",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": ""
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "make_admin",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth_token\n}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"khuong@cpp.edu\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{endpoint}}/organization/make_admin/{{organization_id}}",
+							"host": [
+								"{{endpoint}}"
+							],
+							"path": [
+								"organization",
+								"make_admin",
+								"{{organization_id}}"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "cf9aa4dd-772e-4578-a155-b1df07d01f30",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "ced6fd89-0d02-41e0-92bb-d4e750b1fefe",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
 				}
 			],
 			"protocolProfileBehavior": {}
@@ -262,7 +373,7 @@
 			"name": "event",
 			"item": [
 				{
-					"name": "add_event",
+					"name": "create_event",
 					"request": {
 						"auth": {
 							"type": "bearer",
@@ -294,6 +405,54 @@
 								"event",
 								"add",
 								"{{organization_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete_event",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{endpoint}}/event/delete_event/{{event_id}}",
+							"host": [
+								"{{endpoint}}"
+							],
+							"path": [
+								"event",
+								"delete_event",
+								"{{event_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "register_event",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": ""
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get_pushled_events",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{endpoint}}/event/published_list",
+							"host": [
+								"{{endpoint}}"
+							],
+							"path": [
+								"event",
+								"published_list"
 							]
 						}
 					},
