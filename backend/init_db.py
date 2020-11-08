@@ -60,8 +60,8 @@ def create_db():
                            role=role.Roles.CHAIRMAN)
 
 
-                          organization=test_org1,
-                          role=role.Roles.ADMIN)
+                         # organization=test_org1,
+                          #role=role.Roles.ADMIN)
                 
 
     db.session.add(test_role)

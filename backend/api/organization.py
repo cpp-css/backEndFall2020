@@ -36,27 +36,22 @@ def show_org(org_id):
         return jsonify(success=False,
                        message="The organization does not exists.")
 
-@app.route('/organization/showMembers', methods=['GET'])
-def show_all_member():
-    token = request.headers.get('Authorization')
-    token = token.split()[1]
-    sessionObj = db.session.query(Session).filter(Session.session_id == token).first()
-    print("DEBUG....")
-    print(sessionObj)
-
-    org_name = request.form['org_name']
-    test = Organization.query.filter_by(org_name=org_name).first()
-    print("DEBUG....")
-    print(test)
-    #this name exist -> print all member
-    if test:
-        # print all member
-        member = Role.query.all()
+@app.route('/organization/showMembers/<path:org_id>', methods=['GET'])
+def show_all_member(org_id):
+    organization = Organization.query.filter_by(organization_id=org_id).first()
+    if organization:
+       # print all member
+        member = Role.query.filter_by(role=organization.members).first()
+       if member == Roles.MEMBER:
         member_schema = RoleSchema(many=True)
         result = member_schema.dump(member)
-        return jsonify(result)
-    else:  # this is not exist
-        return jsonify(message='This organization does not exist', success=False)
+        return jsonify(result,success=True)
+       else:
+           return jsonify(success=False,
+                          message="There is no member in this organization")
+    else:
+        return jsonify(success=False,
+                       message="The organization does not exists.")
 
 @app.route('/organization/add', methods=['POST'])
 def add_org():
