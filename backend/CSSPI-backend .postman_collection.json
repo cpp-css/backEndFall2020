@@ -145,17 +145,6 @@
 					"response": []
 				},
 				{
-					"name": "unregister_org",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": ""
-						}
-					},
-					"response": []
-				},
-				{
 					"name": "delete_me",
 					"request": {
 						"auth": {
@@ -248,35 +237,6 @@
 					"response": []
 				},
 				{
-					"name": "register_org",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "7f077e076fbbf3df0066a2076a2d13b6",
-									"type": "string"
-								}
-							]
-						},
-						"method": "POST",
-						"header": [],
-						"url": {
-							"raw": "{{endpoint}}/organization/register/c71098ad-5b72-4b2c-99a2-40ab28517e9d",
-							"host": [
-								"{{endpoint}}"
-							],
-							"path": [
-								"organization",
-								"register",
-								"c71098ad-5b72-4b2c-99a2-40ab28517e9d"
-							]
-						}
-					},
-					"response": []
-				},
-				{
 					"name": "resign_role",
 					"request": {
 						"method": "PUT",
@@ -338,6 +298,82 @@
 							"path": [
 								"organization",
 								"make_admin",
+								"{{organization_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get_unpublished_events",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{endpoint}}/event/unpublished_list",
+							"host": [
+								"{{endpoint}}"
+							],
+							"path": [
+								"event",
+								"unpublished_list"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "register_org",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "7f077e076fbbf3df0066a2076a2d13b6",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{endpoint}}/organization/register/c71098ad-5b72-4b2c-99a2-40ab28517e9d",
+							"host": [
+								"{{endpoint}}"
+							],
+							"path": [
+								"organization",
+								"register",
+								"c71098ad-5b72-4b2c-99a2-40ab28517e9d"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "unregister_org",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth_token\n}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{endpoint}}/organization/resign/{{organization_id}}",
+							"host": [
+								"{{endpoint}}"
+							],
+							"path": [
+								"organization",
+								"resign",
 								"{{organization_id}}"
 							]
 						}
@@ -432,16 +468,53 @@
 				{
 					"name": "register_event",
 					"request": {
-						"method": "GET",
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth_token\n}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
 						"header": [],
 						"url": {
-							"raw": ""
+							"raw": "{{endpoint}}/event/register/9dffa891-186f-45d7-95bf-711d92a697ad",
+							"host": [
+								"{{endpoint}}"
+							],
+							"path": [
+								"event",
+								"register",
+								"9dffa891-186f-45d7-95bf-711d92a697ad"
+							]
 						}
 					},
 					"response": []
 				},
 				{
-					"name": "get_pushled_events",
+					"name": "approve_event",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "{{endpoint}}/event/approve/",
+							"host": [
+								"{{endpoint}}"
+							],
+							"path": [
+								"event",
+								"approve",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get_published_events",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -453,6 +526,44 @@
 							"path": [
 								"event",
 								"published_list"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get_all_unpublished_event",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{endpoint}}/event/unpublished_list/",
+							"host": [
+								"{{endpoint}}"
+							],
+							"path": [
+								"event",
+								"unpublished_list",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "unregister_event",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{endpoint}}/event/unregister/<path:event_id>",
+							"host": [
+								"{{endpoint}}"
+							],
+							"path": [
+								"event",
+								"unregister",
+								"<path:event_id>"
 							]
 						}
 					},
