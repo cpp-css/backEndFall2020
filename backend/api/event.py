@@ -7,6 +7,7 @@ from database.notification import Notification
 from database.session import Session
 from flask import jsonify, request
 from sqlalchemy import or_
+from sqlalchemy import update
 
 
 @app.route('/event/published_list', methods=['GET'])
@@ -22,9 +23,10 @@ def show_all_published_event():
                 'success': False}
 
 
-@app.route('/event/unpublished_list', methods=['GET'])
-def show_all_unpublished_event():
-    events = db.session.query(Event).filter(or_(Event.phase == 0, Event.phase == 2)).all()
+@app.route('/event/unpublished_list/<path:org_id>', methods=['GET'])
+def show_all_unpublished_event(org_id):
+    events = db.session.query(Event).filter(or_(Event.phase == 0, Event.phase == 2),
+                                            Event.organization_id == org_id).all()
     if events:
         events_schema = EventSchema(many=True)
         result = events_schema.dump(events)
@@ -163,16 +165,42 @@ def register_event(event_id):
             return jsonify(success=True,
                            message="You registered for " + event_obj.event_name)
 
-        
+
+@app.route('/event/unregister/<path:event_id>', methods=['DELETE'])
+def unregister_event(event_id):
+    """ User register for a organization"""
+    # Verified the organization id existed or not
+    event_obj = Event.query.filter_by(event_id=event_id).first()
+    event_name = event_obj.event_name
+    token = request.headers.get('Authorization')
+    token = token.split()[1]
+    sessionObj = db.session.query(Session).filter(Session.session_id == token).first()
+    register_obj = db.session.query(Registration).filter(Registration.register_id == sessionObj.user_id,
+                                                         Registration.event_id == event_id).first()
+
+    if not register_obj or register_obj is None:
+        return jsonify(success=False,
+                       message="You haven't registered for this event.")
+    else:
+        db.session.delete(register_obj)
+        db.session.commit()
+        return jsonify(success=True,
+                        message="You successfully unregister for " + event_name)
+
+
 @app.route('/event/approve/<path:event_id>', methods=['PUT'])
 def approve_event(event_id):
     token = request.headers.get('Authorization')
     token = token.split()[1]
     sessionObj = db.session.query(Session).filter(Session.session_id == token).first()
     creator_id = sessionObj.user_id
+    eventObj = db.session.query(Event).filter(Event.event_id == event_id).first()
 
     roleObj = db.session.query(Role).filter(Role.user_id == creator_id,
-                                            Role.organization_id == org_id).first()
+                                            Role.organization_id == eventObj.organization_id).first()
+    print("DEBUG...")
+    print(eventObj)
+    print(roleObj)
     if roleObj is None or not roleObj:
         return {'message': "You do not have any role in this organization",
                 'success': False}
@@ -180,25 +208,7 @@ def approve_event(event_id):
     if roleObj.role != Roles.CHAIRMAN:
         return {'message': 'You need to be an CHAIRMAN in this organization to approve events',
                 'success': False}
-
-    userObj = sessionObj.user
-    orgObj = roleObj.organization
-    contact = orgObj.contact
-
-    eventObj = db.session.query(Event).filter(Event.event_id == event_id).first()
-
     eventObj.phase = 1
-
-    db.session.commit()
-
-    notification_data = {
-        "sender": creator_id,
-        "receiver": eventObj.creator_id,
-        "info": "EVENT approved"
-    }
-
-    notify_chairman = Notification(**notification_data)
-    db.session.add(notify_chairman)
     db.session.commit()
     event_schema = EventSchema()
 
