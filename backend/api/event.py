@@ -24,9 +24,10 @@ def get_all_published_event():
                 'success': False}
 
 
-@app.route('/event/unpublished_list', methods=['GET'])
-def get_all_unpublished_event():
-    events = db.session.query(Event).filter(or_(Event.phase == 0, Event.phase == 2)).all()
+@app.route('/event/unpublished_list/<path:org_id>', methods=['GET'])
+def get_all_unpublished_event(org_id):
+    events = db.session.query(Event).filter(or_(Event.phase == 0, Event.phase == 2),
+                                            Event.organization_id == org_id).all()
     if events:
         events_schema = EventSchema(many=True)
         result = events_schema.dump(events)
@@ -130,7 +131,7 @@ def delete_event(event_id):
             db.session.delete(event)
             db.session.commit()
             return jsonify(success=True,
-                           message= event.event_name + " is deleted.")
+                           message=event.event_name + " is deleted.")
         else:
             return jsonify(success=False,
                            message="You are not chairman or admin.")
