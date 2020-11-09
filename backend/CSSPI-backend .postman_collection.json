@@ -116,6 +116,35 @@
 					"response": []
 				},
 				{
+					"name": "get_user_org",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{endpoint}}/user/organizations",
+							"host": [
+								"{{endpoint}}"
+							],
+							"path": [
+								"user",
+								"organizations"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get_user_events",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": ""
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "delete_me",
 					"request": {
 						"auth": {
@@ -208,6 +237,92 @@
 					"response": []
 				},
 				{
+					"name": "resign_role",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "{{endpoint}}/organization/resign/{{organization_id}}",
+							"host": [
+								"{{endpoint}}"
+							],
+							"path": [
+								"organization",
+								"resign",
+								"{{organization_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "show_board",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": ""
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "make_admin",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth_token\n}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"khuong@cpp.edu\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{endpoint}}/organization/make_admin/{{organization_id}}",
+							"host": [
+								"{{endpoint}}"
+							],
+							"path": [
+								"organization",
+								"make_admin",
+								"{{organization_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get_unpublished_events",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{endpoint}}/event/unpublished_list",
+							"host": [
+								"{{endpoint}}"
+							],
+							"path": [
+								"event",
+								"unpublished_list"
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "register_org",
 					"request": {
 						"auth": {
@@ -237,9 +352,19 @@
 					"response": []
 				},
 				{
-					"name": "resign_role",
+					"name": "unregister_org",
 					"request": {
-						"method": "PUT",
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth_token\n}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
 						"header": [],
 						"url": {
 							"raw": "{{endpoint}}/organization/resign/{{organization_id}}",
@@ -256,13 +381,35 @@
 					"response": []
 				}
 			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "cf9aa4dd-772e-4578-a155-b1df07d01f30",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "ced6fd89-0d02-41e0-92bb-d4e750b1fefe",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
 			"protocolProfileBehavior": {}
 		},
 		{
 			"name": "event",
 			"item": [
 				{
-					"name": "add_event",
+					"name": "create_event",
 					"request": {
 						"auth": {
 							"type": "bearer",
@@ -294,6 +441,129 @@
 								"event",
 								"add",
 								"{{organization_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete_event",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{endpoint}}/event/delete_event/{{event_id}}",
+							"host": [
+								"{{endpoint}}"
+							],
+							"path": [
+								"event",
+								"delete_event",
+								"{{event_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "register_event",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth_token\n}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{endpoint}}/event/register/9dffa891-186f-45d7-95bf-711d92a697ad",
+							"host": [
+								"{{endpoint}}"
+							],
+							"path": [
+								"event",
+								"register",
+								"9dffa891-186f-45d7-95bf-711d92a697ad"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "approve_event",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "{{endpoint}}/event/approve/",
+							"host": [
+								"{{endpoint}}"
+							],
+							"path": [
+								"event",
+								"approve",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get_published_events",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{endpoint}}/event/published_list",
+							"host": [
+								"{{endpoint}}"
+							],
+							"path": [
+								"event",
+								"published_list"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get_all_unpublished_event",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{endpoint}}/event/unpublished_list/",
+							"host": [
+								"{{endpoint}}"
+							],
+							"path": [
+								"event",
+								"unpublished_list",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "unregister_event",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{endpoint}}/event/unregister/<path:event_id>",
+							"host": [
+								"{{endpoint}}"
+							],
+							"path": [
+								"event",
+								"unregister",
+								"<path:event_id>"
 							]
 						}
 					},
