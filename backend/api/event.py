@@ -1,3 +1,4 @@
+from api.helpers import requires_json, requires_auth
 from config import app, db
 from datetime import datetime
 from database.event import Event, EventSchema
@@ -6,6 +7,7 @@ from database.registration import Registration, RegistrationSchema
 from database.notification import Notification
 from database.session import Session
 from flask import jsonify, request
+import logging
 from sqlalchemy import or_
 from sqlalchemy import update
 
@@ -216,3 +218,30 @@ def approve_event(event_id):
               'success': True}
 
     return result
+
+@app.route('/event/<path:event_id>', methods=['POST'])
+@requires_auth
+@requires_json # TODO: Centralize validation on event fields input
+def edit_event(event_id, **kwargs):
+    user = request.user
+    event = db.session.query(Event).filter(Event.event_id == event_id).first()
+    role = user.roles.filter(
+        Role.organization == event.organization,
+        or_(Role.role == Roles.ADMIN, Role.role == Roles.CHAIRMAN)
+    ).first()
+
+    if role == None:
+        return {'success': False, 'message': 'You don\'t have permission to do that!'}, 403
+        
+    # Perform post-processing/sanitization of fields
+    kwargs['start_date'] = datetime.fromisoformat(kwargs['start_date'])
+    kwargs['end_date'] = datetime.fromisoformat(kwargs['end_date'])
+    
+    # Only unpack certain fields to prevent other fields from being edited
+    permitted_keys = ['event_name', 'start_date', 'end_date', 'theme', 'perks', 'categories', 'info']
+    for key, value in kwargs.items():
+        if key in permitted_keys: setattr(event, key, value)
+
+    db.session.commit()
+    return {'success': True, 'message': '', 'event': EventSchema().dump(event)}
+    
