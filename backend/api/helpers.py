@@ -37,12 +37,12 @@ def requires_auth(func):
 
 def requires_json(func):
     @wraps(func)
-    def wrapper():
+    def wrapper(*args, **kwargs):
         body = request.json
         if (body == None):
             abort(400, {'debug': 'Request body missing'})
 
-        return func(**body)
+        return func(*args, **body, **kwargs)
 
     return wrapper
 
@@ -64,7 +64,7 @@ def validate_types(expected):
                     debug += '\'{0}\' was expected to be a {1}, '.format(key, type.__name__)
                 abort(400, {'debug': debug})
 
-            return func(**body)
+            return func(*args, **body)
 
         return wrapper
 
