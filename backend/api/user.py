@@ -13,6 +13,7 @@ from database.session import Session
 from database.user import User
 from database.organization import Organization, OrganizationSchema
 from database.event import Event
+from sqlalchemy.dialects.postgresql import UUID
 
 @app.route('/login', methods=['POST'])
 @requires_json
@@ -97,6 +98,52 @@ def signup(name, email, password, **kwargs):
         'session': session_data
     })
     
+@app.route('/user/change/profile', methods=['PUT'])
+#@requires_json
+def change_profile():
+    #print('hi')
+    token = request.headers.get('Authorization')
+    token = token.split()[1]
+    sessionObj = db.session.query(Session).filter(Session.session_id == token).first()
+    user_id = sessionObj.user_id
+
+    userObj = db.session.query(User).filter(User.user_id == user_id).first()
+    
+    input_data = request.json
+    
+    if input_data['name'] == '':
+        name = userObj.name
+    else:
+        # Validate name
+        min_length = 2
+        max_length = User.__table__.c['name'].type.length
+        if (len(input_data['name']) < min_length):
+            return jsonify({'success': False, 'message': 'Name should be at least {0} characters long'.format(min_length)})
+        if (len(input_data['name']) > max_length):
+            return jsonify({'success': False, 'message': 'Name should be at most {0} characters long'.format(max_length)})
+
+    if input_data['password'] == '':
+        password = userObj.password
+    else:
+         # Ensure strong password
+        password_results = zxcvbn(input_data['password'], user_inputs=[input_data['name'], userObj.email])
+        if (password_results['score'] < 2):
+            suggestions = password_results['feedback']['suggestions']
+            response = {'success': False, 'message': 'Your password is too weak'}
+            if (len(suggestions) > 0):
+                response['message'] += ' - {0}'.format(suggestions[0])
+                return jsonify(response)
+
+    userObj.name=input_data['name']
+    userObj.password=input_data['password']
+
+    db.session.commit()
+
+    return jsonify({'success': True, 'message': 'You have changed your profile!'});
+
+   
+
+
 @app.route('/user/me', methods=['GET'])
 @requires_auth
 def get_me():
