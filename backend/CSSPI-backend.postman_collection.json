@@ -1,7 +1,7 @@
 {
 	"info": {
-		"_postman_id": "7e23012c-e5b4-4321-8ed8-ec26be8aa1d8",
-		"name": "CSSPI-backend ",
+		"_postman_id": "7d9f2302-5841-45a4-9f4b-9a47cfc45ffc",
+		"name": "CSSPI-backend",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
@@ -12,20 +12,13 @@
 					"name": "login",
 					"request": {
 						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "a281810f0501ccb388a7887da6a1a37e",
-									"type": "string"
-								}
-							]
+							"type": "noauth"
 						},
 						"method": "POST",
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"email\": \"daeyoung@cpp.edu\", \r\n    \"password\": \"@qwerty@\"\r\n}",
+							"raw": "{\r\n    \"email\": \"khuong@cpp.edu\", \r\n    \"password\": \"passwordtest\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -48,14 +41,7 @@
 					"name": "signup",
 					"request": {
 						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "b95e5c9bd7b18136c5d155e27c52aa45",
-									"type": "string"
-								}
-							]
+							"type": "noauth"
 						},
 						"method": "POST",
 						"header": [],
@@ -91,7 +77,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "b65c81de7175b07f60db9d7d315fab94",
+									"value": "{{session}}",
 									"type": "string"
 								}
 							]
@@ -152,7 +138,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "b65c81de7175b07f60db9d7d315fab94",
+									"value": "{{session}}",
 									"type": "string"
 								}
 							]
@@ -274,7 +260,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "{{auth_token\n}}",
+									"value": "{{session}}",
 									"type": "string"
 								}
 							]
@@ -330,7 +316,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "7f077e076fbbf3df0066a2076a2d13b6",
+									"value": "{{session}}",
 									"type": "string"
 								}
 							]
@@ -359,7 +345,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "{{auth_token\n}}",
+									"value": "{{session}}",
 									"type": "string"
 								}
 							]
@@ -385,7 +371,7 @@
 				{
 					"listen": "prerequest",
 					"script": {
-						"id": "cf9aa4dd-772e-4578-a155-b1df07d01f30",
+						"id": "3d8b15b1-819f-4d59-b5a5-fb2b9aac35e5",
 						"type": "text/javascript",
 						"exec": [
 							""
@@ -395,7 +381,7 @@
 				{
 					"listen": "test",
 					"script": {
-						"id": "ced6fd89-0d02-41e0-92bb-d4e750b1fefe",
+						"id": "69b00d20-6596-4c1d-b453-8cf9e072b8c8",
 						"type": "text/javascript",
 						"exec": [
 							""
@@ -416,7 +402,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "2d6fc6d87715661bd3cc9800df4f85a8",
+									"value": "{{session}}",
 									"type": "string"
 								}
 							]
@@ -425,7 +411,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"event_name\": \"Career fair\",\r\n    \"start_date\": \"2020-10-31T01:01:01Z\",\r\n    \"end_date\": \"2020-11-30T11:59:59Z\",\r\n    \"theme\": \"job finding\",\r\n    \"perks\": \"money\",\r\n    \"categories\": \"business\",\r\n    \"info\":  \"Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus at aliquet elit. Proin hendrerit eu nisi sed ultricies.\"\r\n}\r\n",
+							"raw": "{\r\n    \"event_name\": \"Career fair\",\r\n    \"start_date\": \"2020-10-31T01:01:01+00:00\",\r\n    \"end_date\": \"2020-11-30T11:59:59+00:00\",\r\n    \"theme\": \"job finding\",\r\n    \"perks\": \"money\",\r\n    \"categories\": \"business\",\r\n    \"info\":  \"Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus at aliquet elit. Proin hendrerit eu nisi sed ultricies.\"\r\n}\r\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -473,7 +459,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "{{auth_token\n}}",
+									"value": "{{session}}",
 									"type": "string"
 								}
 							]
@@ -568,9 +554,68 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "edit_event",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{session}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"event_name\": \"Career fair 2: Electric Boogaloo\",\n    \"start_date\": \"2020-10-31T01:01:01+00:00\",\n    \"end_date\": \"2020-11-30T11:59:59+00:00\",\n    \"theme\": \"job finding\",\n    \"perks\": \"money\",\n    \"categories\": \"business\",\n    \"info\":  \"Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus at aliquet elit. Proin hendrerit eu nisi sed ultricies.\"\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{endpoint}}/event/37c5372f-a80f-4db4-b940-dac7d0866342",
+							"host": [
+								"{{endpoint}}"
+							],
+							"path": [
+								"event",
+								"37c5372f-a80f-4db4-b940-dac7d0866342"
+							]
+						}
+					},
+					"response": []
 				}
 			],
 			"protocolProfileBehavior": {}
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "3d3c4f4b-2b89-4229-9455-e8441618601f",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "981dd52b-69fe-4b76-ad45-0bf72365e8cf",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
 		}
 	],
 	"protocolProfileBehavior": {}
