@@ -125,7 +125,7 @@ def create_db():
                              perks='Perks',
                              categories="info",
                              info='categories',
-                             phase=0,
+                             phase=event.EventPhase.INITIALIZED,
                              contact=test_contact)
 
     test_event1 = event.Event(creator=test_user1,
@@ -137,7 +137,7 @@ def create_db():
                               perks='Perks',
                               categories="info",
                               info='categories',
-                              phase=1,
+                              phase=event.EventPhase.APPROVED,
                               contact=test_contact1)
 
     test_event2 = event.Event(creator=test_user1,
@@ -149,7 +149,7 @@ def create_db():
                               perks='Perks',
                               categories="info",
                               info='categories',
-                              phase=2,
+                              phase=event.EventPhase.ARCHIVED,
                               contact=test_contact1)
     db.session.add(test_event)
     db.session.add(test_event1)

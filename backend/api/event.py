@@ -2,7 +2,7 @@ from api.helpers import requires_json, requires_auth
 from config import app, db
 from datetime import datetime
 
-from database.event import Event, EventSchema
+from database.event import Event, EventSchema, EventPhase
 from database.role import Role, Roles
 from database.user import User
 from database.registration import Registration, RegistrationSchema
@@ -19,7 +19,7 @@ from sqlalchemy import update
 
 @app.route('/event/published_list', methods=['GET'])
 def get_all_published_event():
-    events = db.session.query(Event).filter(Event.phase == 1).all()
+    events = db.session.query(Event).filter(Event.phase == EvenPhase.APPROVED).all()
     if events:
         events_schema = EventSchema(many=True)
         result = events_schema.dump(events)
@@ -32,7 +32,8 @@ def get_all_published_event():
 
 @app.route('/event/unpublished_list/<path:org_id>', methods=['GET'])
 def get_all_unpublished_event(org_id):
-    events = db.session.query(Event).filter(or_(Event.phase == 0, Event.phase == 2),
+    events = db.session.query(Event).filter(or_(Event.phase == EventPhase.INITIALIZED,
+                                                Event.phase == EventPhase.ARCHIVED),
                                             Event.organization_id == org_id).all()
     if events:
         events_schema = EventSchema(many=True)
@@ -78,7 +79,7 @@ def create_event(org_id):
         "perks": input_data['perks'],
         "categories": input_data['categories'],
         "info": input_data['info'],
-        "phase": 0
+        "phase": EventPhase.INITIALIZED
     }
     # print("DEBUG....")
     # print(sessionObj)
@@ -128,7 +129,7 @@ def delete_event(event_id):
         # Only chairman or admin can delete an event.
         if user_role.role == Roles.CHAIRMAN or user_role.role == Roles.ADMIN:
             # An event can be deleted only if it is not published.
-            if event.phase == 1:
+            if event.phase == EventPhase.APPROVED:
                 return jsonify(success=False,
                                message="The event is published so it cannot be deleted.")
 
@@ -149,7 +150,7 @@ def register_event(event_id):
     """ User register for a organization"""
     # Verified the organization id existed or not
     event_obj = Event.query.filter_by(event_id=event_id).first()
-    if not event_obj or event_obj is None or event_obj.phase == 0 or event_obj.phase == 2:
+    if not event_obj or event_obj is None or event_obj.phase == EventPhase.INITIALIZED or event_obj.phase == EventPhase.ARCHIVED:
         return jsonify(success=False,
                        message="The event does not exists.")
     else:
@@ -231,7 +232,7 @@ def approve_event(event_id):
     if roleObj.role != Roles.CHAIRMAN:
         return {'message': 'You need to be an CHAIRMAN in this organization to approve events',
                 'success': False}
-    eventObj.phase = 1
+    eventObj.phase = EventPhase.APPROVED
     db.session.commit()
     event_schema = EventSchema()
 

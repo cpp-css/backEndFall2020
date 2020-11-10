@@ -2,7 +2,12 @@ from datetime import datetime
 from config import db, ma
 from sqlalchemy.dialects.postgresql import UUID
 import uuid
+from enum import Enum
 
+class EventPhase(Enum):
+    INITIALIZED = 0
+    APPROVED = 1
+    ARCHIVED = 2
 
 class Event(db.Model):
     __tablename__ = 'Event'
@@ -16,7 +21,7 @@ class Event(db.Model):
     perks = db.Column(db.String(250), nullable=False)
     categories = db.Column(db.String(250), nullable=False)
     info = db.Column(db.String(2500), nullable=False)
-    phase = db.Column(db.Integer, nullable=False)
+    phase = db.Column(db.Enum(EventPhase), nullable=False)
     contact_id = db.Column(UUID(as_uuid=True), db.ForeignKey('Contact.contact_id'), nullable=False)
     image_url = db.Column(db.String(255))
 
