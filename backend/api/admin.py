@@ -63,7 +63,7 @@ def make_admin(org_id):
 
 
 
-@app.route('/admins/remove_admin1', methods=['POST'])
+@app.route('/admins/remove_admin', methods=['DELETE'])
 def remove_admin():
     token = request.headers.get('Authorization')
     token = token.split()[1]
