@@ -28,6 +28,7 @@ class Registration(db.Model):
         self.info = info
         self.qr = qr'''
 
+
 class RegistrationSchema(ma.Schema):
     class Meta:
         fields = ('registration_id', 'register_id', 'event_id', 'created_at', 'type')

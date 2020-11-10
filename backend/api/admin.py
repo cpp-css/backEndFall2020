@@ -62,7 +62,6 @@ def make_admin(org_id):
             return jsonify(message='You do not allow to make admin', success=False)
 
 
-
 @app.route('/admins/remove_admin1', methods=['POST'])
 def remove_admin():
     token = request.headers.get('Authorization')

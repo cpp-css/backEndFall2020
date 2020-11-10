@@ -37,6 +37,7 @@ class Event(db.Model):
         self.phase = phase
         self.contact_id = contact_id'''
 
+
 class EventSchema(ma.Schema):
     class Meta:
         fields = ('event_id', 'creator_id', 'organization_id', 'event_name', 'start_date', 'end_date', 'theme', 'perks', 'categories', 'info', 'phase', 'contact_id')
