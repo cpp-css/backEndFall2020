@@ -63,8 +63,8 @@ def make_admin(org_id):
 
 
 
-@app.route('/admins/remove_admin1', methods=['POST'])
-def remove_admin():
+@app.route('/admins/remove_admin1/<path:org_id>', methods=['POST'])
+def remove_admin(org_id):
     token = request.headers.get('Authorization')
     token = token.split()[1]
     sessionObj = db.session.query(Session).filter(Session.session_id == token).first()
@@ -77,15 +77,18 @@ def remove_admin():
         # Check if the user is chairman or admin.
         if current_role.role == Roles.CHAIRMAN:
             input_data = request.json
-            new_role_email = input_data['email']
-            new_user = User.query.filter_by(email=new_role_email).first()
-            new_admin = Role(user_id=new_user.user_id,
+            old_role_email = input_data['email']
+            old_user = User.query.filter_by(email=old_role_email).first()
+            old_admin = Role(user_id=old_user.user_id,
                              organization_id=org_id,
                              role=Roles.ADMIN)
-            result = {'message': new_user.name + " is our new Admin",
-                      'success': True}
-            db.session.add(new_admin)
+
+            db.session.remove(old_admin)
             db.session.commit()
+            result = {'message': old_user.name + " removed from admin",
+                      'success': True}
             return jsonify(result)
         else:
             return jsonify(message='You do not allow to make admin', success=False)
+
+

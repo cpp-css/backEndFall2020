@@ -216,3 +216,37 @@ def approve_event(event_id):
               'success': True}
 
     return result
+
+@app.route('/event/cancel/<path:event_id>', methods=['PUT'])
+def cancel_event(event_id):
+    token = request.headers.get('Authorization')
+    token = token.split()[1]
+    sessionObj = db.session.query(Session).filter(Session.session_id == token).first()
+    creator_id = sessionObj.user_id
+    eventObj = db.session.query(Event).filter(Event.event_id == event_id).first()
+    if eventObj is None or not eventObj:
+        return {'message': "This event does not exist !!! ",
+                'success': False}
+
+    roleObj = db.session.query(Role).filter(Role.user_id == creator_id,
+                                            Role.organization_id == eventObj.organization_id).first()
+    print("DEBUG...")
+    print(eventObj)
+    print(roleObj)
+    # if the event exist, check a status of the person
+    if roleObj is None or not roleObj:
+        return {'message': "You do not have any role in this organization",
+                'success': False}
+
+    if roleObj.role != Roles.CHAIRMAN:
+        return {'message': 'You need to be an CHAIRMAN in this organization to cancle events',
+                'success': False}
+    # This is admin or chairman
+    eventObj.phase = 2
+    db.session.commit()
+    event_schema = EventSchema()
+
+    result = {'message': event_schema.dump(eventObj) + " have been canceled",
+              'success': True}
+
+    return result
