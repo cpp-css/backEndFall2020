@@ -1,5 +1,6 @@
 from config import app, db
 from datetime import datetime
+
 from database.event import Event, EventSchema
 from database.role import Role, Roles
 from database.user import User
@@ -7,6 +8,8 @@ from database.registration import Registration, RegistrationSchema
 from database.notification import Notification
 from database.session import Session
 from database.registration import Registration, RegistrationSchema
+
+from api.helpers import *
 from flask import jsonify, request
 from sqlalchemy import or_
 
@@ -103,6 +106,7 @@ def create_event(org_id):
 
 
 @app.route('/event/delete_event/<path:event_id>', methods=['DELETE'])
+@requires_auth
 def delete_event(event_id):
     # Verified the organization id existed or not
     event = Event.query.filter_by(event_id=event_id).first()
