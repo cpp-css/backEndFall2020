@@ -17,6 +17,7 @@ def show_board(org_id):
         user_name = User.query.filter(User.user_id == eachRole.user_id).first()
         data = {
             'name': user_name.name,
+            'email': user_name.email,
             'role': str(eachRole.role).split(".")[1]
         }
         result.append(data)
@@ -61,7 +62,7 @@ def make_admin(org_id):
         else:
             return jsonify(message='You do not allow to make admin', success=False)
 
-
+          
 @app.route('/admins/remove_admin/<path:org_id>', methods=['DELETE'])
 def remove_admin(org_id):
     token = request.headers.get('Authorization')
@@ -76,18 +77,17 @@ def remove_admin(org_id):
         # Check if the user is chairman or admin.
         if current_role.role == Roles.CHAIRMAN:
             input_data = request.json
-            old_role_email = input_data['email']
-            old_user = User.query.filter_by(email=old_role_email).first()
-            old_admin = Role(user_id=old_user.user_id,
-                             organization_id=org_id,
-                             role=Roles.ADMIN)
+            new_role_email = input_data['email']
+            wanted_user = User.query.filter_by(email=new_role_email).first()
+            user_role = Role.query.filter(Role.user_id==wanted_user.user_id,
+                                          Role.organization_id==org_id).first()
+            if user_role.role == Roles.ADMIN:
+                db.session.delete(user_role)
+                db.session.commit()
+                return jsonify(message=wanted_user.name + 'is no longer an admin', success=True)
+            else:
+                return jsonify(message='This user is not an admin', success=False)
 
-            db.session.remove(old_admin)
-            db.session.commit()
-            result = {'message': old_user.name + " removed from admin",
-                      'success': True}
-            return jsonify(result)
         else:
-            return jsonify(message='You do not allow to make admin', success=False)
-
+            return jsonify(message='You do not allow to remove admin', success=False)
 
