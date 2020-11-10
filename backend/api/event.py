@@ -1,3 +1,4 @@
+from api.helpers import requires_json, requires_auth
 from config import app, db
 from datetime import datetime
 
@@ -11,7 +12,9 @@ from database.registration import Registration, RegistrationSchema
 
 from api.helpers import *
 from flask import jsonify, request
+import logging
 from sqlalchemy import or_
+from sqlalchemy import update
 
 
 @app.route('/event/published_list', methods=['GET'])
@@ -186,3 +189,80 @@ def get_all_participants(event_id):
             participants.append(data)
         return jsonify({'success': True, 'message': 'Show all participants', 'participants': participants})
 
+@app.route('/event/unregister/<path:event_id>', methods=['DELETE'])
+def unregister_event(event_id):
+    """ User register for a organization"""
+    # Verified the organization id existed or not
+    event_obj = Event.query.filter_by(event_id=event_id).first()
+    event_name = event_obj.event_name
+    token = request.headers.get('Authorization')
+    token = token.split()[1]
+    sessionObj = db.session.query(Session).filter(Session.session_id == token).first()
+    register_obj = db.session.query(Registration).filter(Registration.register_id == sessionObj.user_id,
+                                                         Registration.event_id == event_id).first()
+
+    if not register_obj or register_obj is None:
+        return jsonify(success=False,
+                       message="You haven't registered for this event.")
+    else:
+        db.session.delete(register_obj)
+        db.session.commit()
+        return jsonify(success=True,
+                        message="You successfully unregister for " + event_name)
+
+
+@app.route('/event/approve/<path:event_id>', methods=['PUT'])
+def approve_event(event_id):
+    token = request.headers.get('Authorization')
+    token = token.split()[1]
+    sessionObj = db.session.query(Session).filter(Session.session_id == token).first()
+    creator_id = sessionObj.user_id
+    eventObj = db.session.query(Event).filter(Event.event_id == event_id).first()
+
+    roleObj = db.session.query(Role).filter(Role.user_id == creator_id,
+                                            Role.organization_id == eventObj.organization_id).first()
+    print("DEBUG...")
+    print(eventObj)
+    print(roleObj)
+    if roleObj is None or not roleObj:
+        return {'message': "You do not have any role in this organization",
+                'success': False}
+
+    if roleObj.role != Roles.CHAIRMAN:
+        return {'message': 'You need to be an CHAIRMAN in this organization to approve events',
+                'success': False}
+    eventObj.phase = 1
+    db.session.commit()
+    event_schema = EventSchema()
+
+    result = {'message': event_schema.dump(eventObj),
+              'success': True}
+
+    return result
+
+@app.route('/event/<path:event_id>', methods=['POST'])
+@requires_auth
+@requires_json # TODO: Centralize validation on event fields input
+def edit_event(event_id, **kwargs):
+    user = request.user
+    event = db.session.query(Event).filter(Event.event_id == event_id).first()
+    role = user.roles.filter(
+        Role.organization == event.organization,
+        or_(Role.role == Roles.ADMIN, Role.role == Roles.CHAIRMAN)
+    ).first()
+
+    if role == None:
+        return {'success': False, 'message': 'You don\'t have permission to do that!'}, 403
+        
+    # Perform post-processing/sanitization of fields
+    kwargs['start_date'] = datetime.fromisoformat(kwargs['start_date'])
+    kwargs['end_date'] = datetime.fromisoformat(kwargs['end_date'])
+    
+    # Only unpack certain fields to prevent other fields from being edited
+    permitted_keys = ['event_name', 'start_date', 'end_date', 'theme', 'perks', 'categories', 'info']
+    for key, value in kwargs.items():
+        if key in permitted_keys: setattr(event, key, value)
+
+    db.session.commit()
+    return {'success': True, 'message': '', 'event': EventSchema().dump(event)}
+    
