@@ -90,6 +90,7 @@ def create_event(org_id):
         "info": "EVENT created"
     }
 
+
     notify_chairman = Notification(**notification_data)
     db.session.add(notify_chairman)
     db.session.commit()
