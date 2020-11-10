@@ -2,7 +2,7 @@ from api.helpers import requires_json, requires_auth
 from config import app, db
 from datetime import datetime
 
-from database.event import Event, EventSchema, EventPhase
+from database.event import Event, EventPhase, EventSchema
 from database.role import Role, Roles
 from database.user import User
 from database.registration import Registration, RegistrationSchema
@@ -19,9 +19,11 @@ from sqlalchemy import update
 
 @app.route('/event/published_list', methods=['GET'])
 def get_all_published_event():
-    events = db.session.query(Event).filter(Event.phase == EvenPhase.APPROVED).all()
+    events = db.session.query(Event).filter(Event.phase == EventPhase.APPROVED).all()
+    print(events)
     if events:
         events_schema = EventSchema(many=True)
+        #events = events.schema.dump(self)
         result = events_schema.dump(events)
         return jsonify(result=result,
                        success=True)
@@ -36,7 +38,7 @@ def get_all_unpublished_event(org_id):
                                                 Event.phase == EventPhase.ARCHIVED),
                                             Event.organization_id == org_id).all()
     if events:
-        events_schema = EventSchema(many=True)
+        events_schema = EventSchema()
         result = events_schema.dump(events)
         return jsonify(result=result,
                        success=True)

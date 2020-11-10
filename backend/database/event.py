@@ -1,13 +1,16 @@
 from datetime import datetime
 from config import db, ma
 from sqlalchemy.dialects.postgresql import UUID
+from marshmallow_sqlalchemy import SQLAlchemySchema, auto_field
+from marshmallow_enum import EnumField
+
 import uuid
 from enum import Enum
 
-class EventPhase(Enum):
-    INITIALIZED = 0
-    APPROVED = 1
-    ARCHIVED = 2
+class EventPhase(int, Enum):
+    INITIALIZED: int = 0
+    APPROVED: int = 1
+    ARCHIVED: int = 2
 
 class Event(db.Model):
     __tablename__ = 'Event'
@@ -42,7 +45,24 @@ class Event(db.Model):
         self.phase = phase
         self.contact_id = contact_id'''
 
+    '''
+    @classmethod
+    def schema(cls):
+        class Schema(SQLAlchemySchema):
+            class Meta:
+                model = Event
+
+            event_id = auto_field()
+            phase = EnumField(EventPhase)
+
+        if (not hasattr(cls, '_schema')): cls._schema = Schema()
+        return cls._schema
+
+    def dump(self):
+        return EventPhase.schema().dump(self)
+    '''
+
 
 class EventSchema(ma.Schema):
     class Meta:
-        fields = ('event_id', 'creator_id', 'organization_id', 'event_name', 'start_date', 'end_date', 'theme', 'perks', 'categories', 'info', 'phase', 'contact_id')
+        fields = ('event_id', 'creator_id', 'organization_id', 'event_name', 'start_date', 'end_date', 'theme', 'perks', 'categories', 'phase', 'info', 'contact_id')
