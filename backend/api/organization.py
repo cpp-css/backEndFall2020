@@ -154,7 +154,7 @@ def unregister_org(org_id):
                 # Resign chairman or admin role by enter new chairman or admin's email.
                 new_role_email = request.form.get('email')
                 new_role = User.query.filter_by(email=new_role_email).first()
-                # Assign new chairman or admin to the organization.
+                # Assign new chairman to the organization.
                 current_role.user = new_role
 
                 db.session.commit()
