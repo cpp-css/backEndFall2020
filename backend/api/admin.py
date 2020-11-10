@@ -62,7 +62,7 @@ def make_admin(org_id):
         else:
             return jsonify(message='You do not allow to make admin', success=False)
 
-          
+
 @app.route('/admins/remove_admin/<path:org_id>', methods=['DELETE'])
 def remove_admin(org_id):
     token = request.headers.get('Authorization')
@@ -77,6 +77,7 @@ def remove_admin(org_id):
         # Check if the user is chairman or admin.
         if current_role.role == Roles.CHAIRMAN:
             input_data = request.json
+
             new_role_email = input_data['email']
             wanted_user = User.query.filter_by(email=new_role_email).first()
             user_role = Role.query.filter(Role.user_id==wanted_user.user_id,
