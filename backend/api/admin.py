@@ -63,7 +63,10 @@ def make_admin(org_id):
             return jsonify(message='You do not allow to make admin', success=False)
 
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 31b636f1e18dd65a7c427c03a695f929413812be
 @app.route('/admins/remove_admin/<path:org_id>', methods=['DELETE'])
 def remove_admin(org_id):
     token = request.headers.get('Authorization')
@@ -78,6 +81,7 @@ def remove_admin(org_id):
         # Check if the user is chairman or admin.
         if current_role.role == Roles.CHAIRMAN:
             input_data = request.json
+<<<<<<< HEAD
             new_role_email = input_data['email']
             wanted_user = User.query.filter_by(email=new_role_email).first()
             user_role = Role.query.filter(Role.user_id==wanted_user.user_id,
@@ -91,3 +95,20 @@ def remove_admin(org_id):
 
         else:
             return jsonify(message='You do not allow to remove admin', success=False)
+=======
+            old_role_email = input_data['email']
+            old_user = User.query.filter_by(email=old_role_email).first()
+            old_admin = Role(user_id=old_user.user_id,
+                             organization_id=org_id,
+                             role=Roles.ADMIN)
+
+            db.session.remove(old_admin)
+            db.session.commit()
+            result = {'message': old_user.name + " removed from admin",
+                      'success': True}
+            return jsonify(result)
+        else:
+            return jsonify(message='You do not allow to make admin', success=False)
+
+
+>>>>>>> 31b636f1e18dd65a7c427c03a695f929413812be
