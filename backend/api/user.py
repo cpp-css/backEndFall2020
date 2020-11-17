@@ -2,6 +2,7 @@ from datetime import datetime, timedelta
 from email_validator import validate_email, EmailNotValidError
 from flask import jsonify, request
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy import or_
 from zxcvbn import zxcvbn
 
 from api.helpers import *
@@ -170,3 +171,26 @@ def get_registered_events():
         }
         events.append(data)
     return jsonify({'success': True, 'message': 'show my registered events', 'events': events})
+
+@app.route('/user/managed_organization', methods=['GET'])
+@requires_auth
+def get_managed_organizations():
+    token = request.headers.get('Authorization')
+    token = token.split()[1]
+    session_obj = db.session.query(Session).filter(Session.session_id == token).first()
+    managed_obj = db.session.query(Role).filter(Role.user_id == session_obj.user_id,
+                                                or_(Role.role == Roles.ADMIN, Role.role == Roles.CHAIRMAN)).all()
+    print (session_obj.user_id)
+    print(managed_obj)
+    managed_orgs = []
+    if managed_obj:
+        for managed in managed_obj:
+            org_obj = db.session.query(Organization).filter(Organization.organization_id == managed.organization_id).first()
+            data = {
+                'organization_id': org_obj.organization_id,
+                'organization_name': org_obj.org_name,
+            }
+            managed_orgs.append(data)
+        return jsonify({'success': True, 'message': 'Showing organizations managed by you', 'managed_orgs': managed_orgs})
+    else:
+        return jsonify({'success': False, 'message': 'You do not manage any organizations'})
