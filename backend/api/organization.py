@@ -1,4 +1,6 @@
 from config import app, db
+
+from api.helpers import *
 from database.organization import Organization, OrganizationSchema
 from database.contact import Contact
 from database.user import User
@@ -25,52 +27,41 @@ def show_org(org_id):
     """ Return a specific organization by its ID """
     # Verify the organize exists.
     organization = Organization.query.filter_by(organization_id=org_id).first()
-    if organization:
+    if not organization or organization is None:
+        return jsonify(success=False,
+                       message="The organization does not exists.")
+    else:
         return jsonify(success=True,
                        org_name=organization.org_name,
                        organization_id=organization.organization_id,
-                       #admin_id=organization.admin_id,
-                       #chairman_id=organization.chairman_id,
+                       # admin_id=organization.admin_id,
+                       # chairman_id=organization.chairman_id,
                        categories=organization.categories)
-    else:
-        return jsonify(success=False,
-                       message="The organization does not exists.")
 
 
-@app.route('/organization/showMembers', methods=['GET'])
-def show_all_member():
-    token = request.headers.get('Authorization')
-    token = token.split()[1]
-    sessionObj = db.session.query(Session).filter(Session.session_id == token).first()
-    print("DEBUG....")
-    print(sessionObj)
+@app.route('/organization/showMembers/<path:org_id>', methods=['GET'])
+def get_all_member(org_id):
+    all_members = db.session.query(Role).filter(Role.organization_id == org_id, Role.role == Roles.MEMBER).all()
 
-    org_name = request.form['org_name']
-    test = Organization.query.filter_by(org_name=org_name).first()
-    print("DEBUG....")
-    print(test)
-    #this name exist -> print all member
-    if test:
-        # print all member
-        member = Role.query.all()
-        member_schema = RoleSchema(many=True)
-        result = member_schema.dump(member)
-        return jsonify(result)
-    else:  # this is not exist
+    if all_members is None or not all_members:
         return jsonify(message='This organization does not exist', success=False)
+    else:
+        list_member = []
+        for member in all_members:
+            user_obj = db.session.query(User).filter(User.user_id == member.user_id).first()
+            data = {
+                'name': user_obj.name,
+                'user_id': user_obj.email
+            }
+            list_member.append(data)
+        return jsonify({'success': True, 'message': 'Show all members', 'participants': list_member})
 
 
 @app.route('/organization/add', methods=['POST'])
+@requires_auth
 def add_org():
-    """ Add new organization """
-    # Get the session by verify the token and get the user_id
-    token = request.headers.get('Authorization')
-    token = token.split()[1]
-    sessionObj = db.session.query(Session).filter(Session.session_id == token).first()
-    #print("DEBUG....")
-    #print(sessionObj)
+    sessionObj = request.session
 
-    # Test if the organization exists.
     input_data = request.json
     org_name = input_data['org_name']
     categories = input_data['categories']
@@ -102,22 +93,21 @@ def add_org():
 
 
 @app.route('/organization/register/<path:org_id>', methods=['POST'])
+@requires_auth
 def register_org(org_id):
     """ User register for a organization"""
-    # Verified the organization id existed or not
     organization = Organization.query.filter_by(organization_id=org_id).first()
-    if organization:
-        # Get the session token
-        token = request.headers.get('Authorization')
-        token = token.split()[1]
-        sessionObj = db.session.query(Session).filter(Session.session_id == token).first()
-        print("...SESSION TOKEN...")
-        print(sessionObj)
+    if organization is None:
+        return jsonify(success=False,
+                       message="The organization does not exists.")
+    else:
+        sessionObj = request.session
 
-        # Query the the role matches the organization and the user.
         current_role = Role.query.filter_by(organization_id=org_id, user_id=sessionObj.user_id).first()
-        # If the user is not in the organization, create new MEMBER role for the user.
-        if current_role is None:
+        if current_role:  # Already in the organization
+            return jsonify(success=False,
+                           message="You already have been registered for this organization.")
+        else:
             new_member = Role(user_id=sessionObj.user_id,
                               organization=organization,
                               role=Roles.MEMBER)
@@ -125,33 +115,30 @@ def register_org(org_id):
             db.session.commit()
             return jsonify(success=True,
                            message="You registered for " + organization.org_name)
-        else:
-            return jsonify(success=False,
-                           message="You already have been registered for this organization.")
-    else:
-        return jsonify(success=False,
-                       message="The organization does not exists.")
 
 
 @app.route('/organization/resign/<path:org_id>', methods=['DELETE'])
+@requires_auth
 def unregister_org(org_id):
     """ Resign admin/chairman """
     # Verified the organization id existed or not
     organization = Organization.query.filter_by(organization_id=org_id).first()
-    if organization:
+    if organization is None:
+        return jsonify(success=False,
+                       message="The organization does not exists.")
+    else:
         # Get the session token
-        token = request.headers.get('Authorization')
-        token = token.split()[1]
-        sessionObj = db.session.query(Session).filter(Session.session_id == token).first()
-        print("...SESSION TOKEN...")
-        print(sessionObj)
+        sessionObj = request.session
 
         # Query the the role matches the organization and the user.
         current_role = Role.query.filter_by(organization_id=org_id, user_id=sessionObj.user_id).first()
-        if current_role:
+        if current_role is None:
+            return jsonify(success=False,
+                           message="You are not member of this organization.")
+        else:
             # Check if the user is chairman or admin.
             if current_role.role == Roles.CHAIRMAN:
-                # Resign chairman or admin role by enter new chairman or admin's email.
+                # Resign chairman by enter new chairman's email.
                 new_role_email = request.form.get('email')
                 new_role = User.query.filter_by(email=new_role_email).first()
                 # Assign new chairman to the organization.
@@ -162,14 +149,8 @@ def unregister_org(org_id):
                 role = str(current_role.role).split(".")[1]  # get the role for print out
                 return jsonify(success=True,
                                message=old_role.name + " resigned. " + new_role.name + " becomes " + role + " of " + organization.org_name)
-            else: # ADMIN OR TEAM MEMBERS
+            else:  # ADMIN OR TEAM MEMBERS
                 db.session.delete(current_role)
                 db.session.commit()
                 return jsonify(success=True,
                                message="We will miss you.")
-        else:
-            return jsonify(success=False,
-                           message="You are not member of this organization.")
-    else:
-        return jsonify(success=False,
-                       message="The organization does not exists.")

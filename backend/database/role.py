@@ -37,6 +37,7 @@ class Role(db.Model):
     def dump(self):
         return Role.schema().dump(self)
 
+
 class RoleSchema(ma.Schema):
     class Meta:
         fields = ('role_id', 'user_id', 'role')
