@@ -6,6 +6,7 @@ from database.role import Role, Roles
 from database.session import Session
 from database.role import Role, RoleSchema
 from database.user import User, UserSchema
+from database.event import Event, EventSchema, EventPhase
 from flask import jsonify, request
 from datetime import datetime
 
@@ -19,6 +20,21 @@ def show_all_org():
     return jsonify(result=result,
                    success=True)
 
+@app.route('/organization/<org_id>/events/published', methods=['GET'])
+def show_all_published_events(org_id):
+    """ Return a specific organization by its ID """
+    # Verify the organize exists.
+    organization = Organization.query.filter_by(organization_id=org_id).first()
+    if organization:
+        events = db.session.query(Event).filter((Event.organization_id == organization.organization_id), Event.phase == EventPhase.APPROVED).all()
+        events_schema = EventSchema(many=True)
+        result = events_schema.dump(events)
+        #result = EventSchema.dump(events, many=True)
+        return jsonify(result=result,
+                   success=True)
+    else:
+        return jsonify(success=False,
+                       message="The organization does not exists.")
 
 @app.route('/organization/details/<path:org_id>', methods=['GET'])
 def show_org(org_id):
