@@ -20,7 +20,6 @@ from sqlalchemy import update
 @app.route('/event/published_list', methods=['GET'])
 def get_all_published_event():
     events = db.session.query(Event).filter(Event.phase == EventPhase.APPROVED).all()
-    print(events)
     if events:
         events_schema = EventSchema(many=True)
         #events = events.schema.dump(self)
@@ -302,3 +301,4 @@ def edit_event(event_id, **kwargs):
 
     db.session.commit()
     return {'success': True, 'message': '', 'event': EventSchema().dump(event)}
+
