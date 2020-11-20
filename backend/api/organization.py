@@ -8,6 +8,7 @@ from database.role import Role, Roles
 from database.session import Session
 from database.role import Role, RoleSchema
 from database.user import User, UserSchema
+from database.event import Event, EventSchema
 from flask import jsonify, request
 from datetime import datetime
 
@@ -154,3 +155,25 @@ def unregister_org(org_id):
                 db.session.commit()
                 return jsonify(success=True,
                                message="We will miss you.")
+
+@app.route('/organization/managed_events/<path:organization_id>', methods=['GET'])
+def get_managed_events(organization_id):
+    managed_events = Event.query.filter_by(organization_id=organization_id).all()
+    org_obj = Organization.query.filter_by(organization_id=organization_id).first()
+    org_name = org_obj.org_name
+    managed_orgs = []
+    if managed_events:
+        for managed in managed_events:
+            data = {
+                'event_id': managed.event_id,
+                'event_name': managed.event_name,
+                'start_date': managed.start_date,
+                'end_date': managed.end_date
+            }
+            managed_orgs.append(data)
+        return jsonify({'success': True, 'organization': org_name, 'message': 'Show all events managed by this organization',
+                        'result': managed_orgs})
+    else:
+        return {'message': 'This organization has no registered events.',
+                'success': False}
+
