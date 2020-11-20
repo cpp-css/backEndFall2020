@@ -2,7 +2,7 @@ from api.helpers import requires_json, requires_auth
 from config import app, db
 from datetime import datetime
 
-from database.event import Event, EventSchema, EventPhase
+from database.event import Event, EventPhase, EventSchema
 from database.role import Role, Roles
 from database.user import User
 from database.registration import Registration, RegistrationSchema
@@ -22,6 +22,7 @@ def get_all_published_event():
     events = db.session.query(Event).filter(Event.phase == EventPhase.APPROVED).all()
     if events:
         events_schema = EventSchema(many=True)
+        #events = events.schema.dump(self)
         result = events_schema.dump(events)
         return jsonify(result=result,
                        success=True)
@@ -36,7 +37,7 @@ def get_all_unpublished_event(org_id):
                                                 Event.phase == EventPhase.ARCHIVED),
                                             Event.organization_id == org_id).all()
     if events:
-        events_schema = EventSchema(many=True)
+        events_schema = EventSchema()
         result = events_schema.dump(events)
         return jsonify(result=result,
                        success=True)
@@ -241,6 +242,40 @@ def approve_event(event_id):
 
     return result
 
+@app.route('/event/cancel/<path:event_id>', methods=['PUT'])
+def cancel_event(event_id):
+    token = request.headers.get('Authorization')
+    token = token.split()[1]
+    sessionObj = db.session.query(Session).filter(Session.session_id == token).first()
+    creator_id = sessionObj.user_id
+    eventObj = db.session.query(Event).filter(Event.event_id == event_id).first()
+    if eventObj is None or not eventObj:
+        return {'message': "This event does not exist !!! ",
+                'success': False}
+
+    roleObj = db.session.query(Role).filter(Role.user_id == creator_id,
+                                            Role.organization_id == eventObj.organization_id).first()
+    print("DEBUG...")
+    print(eventObj)
+    print(roleObj)
+    # if the event exist, check a status of the person
+    if roleObj is None or not roleObj:
+        return {'message': "You do not have any role in this organization",
+                'success': False}
+
+    if roleObj.role != Roles.CHAIRMAN:
+        return {'message': 'You need to be an CHAIRMAN in this organization to cancel events',
+                'success': False}
+    # This is admin or chairman
+    eventObj.phase = EventPhase.ARCHIVED
+    db.session.commit()
+    event_schema = EventSchema()
+
+    result = {'message': event_schema.dump(eventObj) + " have been canceled",
+              'success': True}
+
+    return result
+
 @app.route('/event/<path:event_id>', methods=['POST'])
 @requires_auth
 @requires_json # TODO: Centralize validation on event fields input
@@ -266,3 +301,4 @@ def edit_event(event_id, **kwargs):
 
     db.session.commit()
     return {'success': True, 'message': '', 'event': EventSchema().dump(event)}
+
