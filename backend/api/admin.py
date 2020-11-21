@@ -7,7 +7,7 @@ from flask import jsonify, request
 from sqlalchemy import or_
 
 
-@app.route('/organization/organizer/<path:org_id>', methods=['GET'])
+@app.route('/organization/board/<path:org_id>', methods=['GET'])
 def show_board(org_id):
     """ Search in role, if role  = 1 is admins, else skip. Print all admins out"""
     all_roles = Role.query.filter(Role.organization_id == org_id,
@@ -85,7 +85,7 @@ def remove_admin(org_id):
             if user_role.role == Roles.ADMIN:
                 db.session.delete(user_role)
                 db.session.commit()
-                return jsonify(message=wanted_user.name + 'is no longer an admin', success=True)
+                return jsonify(message=wanted_user.name + ' is no longer an admin', success=True)
             else:
                 return jsonify(message='This user is not an admin', success=False)
 

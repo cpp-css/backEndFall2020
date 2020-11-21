@@ -14,7 +14,7 @@ from datetime import datetime
 
 
 @app.route('/organization/list', methods=['GET'])
-def show_all_org():
+def get_all_org():
     """ Return all organizations """
     organizations = Organization.query.all()
     organizations_schema = OrganizationSchema(many=True)
@@ -23,12 +23,13 @@ def show_all_org():
                    success=True)
 
 @app.route('/organization/<org_id>/events/published', methods=['GET'])
-def show_all_published_events(org_id):
+def get_all_published_events(org_id):
     """ Return a specific organization by its ID """
     # Verify the organize exists.
     organization = Organization.query.filter_by(organization_id=org_id).first()
     if organization:
-        events = db.session.query(Event).filter((Event.organization_id == organization.organization_id), Event.phase == EventPhase.APPROVED).all()
+        events = db.session.query(Event).filter((Event.organization_id == organization.organization_id),
+                                                 Event.phase == EventPhase.APPROVED).all()
         events_schema = EventSchema(many=True)
         result = events_schema.dump(events)
         #result = EventSchema.dump(events, many=True)
@@ -39,7 +40,7 @@ def show_all_published_events(org_id):
                        message="The organization does not exists.")
 
 @app.route('/organization/details/<path:org_id>', methods=['GET'])
-def show_org(org_id):
+def get_org_info(org_id):
     """ Return a specific organization by its ID """
     # Verify the organize exists.
     organization = Organization.query.filter_by(organization_id=org_id).first()
@@ -47,20 +48,39 @@ def show_org(org_id):
         return jsonify(success=False,
                        message="The organization does not exists.")
     else:
+        board = db.session.query(Role).filter(Role.organization_id == org_id,
+                                              Role.role != Roles.MEMBER).all()
+        board_members = []
+        for member in board:
+            user_obj = db.session.query(User).filter(User.user_id == member.user_id).first()
+            print(user_obj.name, user_obj.email, member.role)
+            data = {
+                'name': user_obj.name,
+                'user_id': user_obj.email,
+                'role': member.role.name
+            }
+            board_members.append(data)
         return jsonify(success=True,
                        org_name=organization.org_name,
                        organization_id=organization.organization_id,
                        # admin_id=organization.admin_id,
-                       # chairman_id=organization.chairman_id,
+                       board=board_members,
                        categories=organization.categories)
 
 
-@app.route('/organization/showMembers/<path:org_id>', methods=['GET'])
+@app.route('/organization/show_members/<path:org_id>', methods=['GET'])
+@requires_auth
 def get_all_member(org_id):
+    sessionObj = request.session
+    # only user in an organization can see all members.
+    is_in_org = db.session.query(Role).filter(Role.user_id == sessionObj.user_id ).all()
+
+    if is_in_org is None:
+        return jsonify(message='You are not member of this organization', success=False)
     all_members = db.session.query(Role).filter(Role.organization_id == org_id, Role.role == Roles.MEMBER).all()
 
     if all_members is None or not all_members:
-        return jsonify(message='This organization does not exist', success=False)
+        return jsonify(message='This organization does not have any members', success=False)
     else:
         list_member = []
         for member in all_members:
@@ -70,7 +90,7 @@ def get_all_member(org_id):
                 'user_id': user_obj.email
             }
             list_member.append(data)
-        return jsonify({'success': True, 'message': 'Show all members', 'participants': list_member})
+        return jsonify({'success': True, 'message': 'Show all members', 'members': list_member})
 
 
 @app.route('/organization/add', methods=['POST'])
@@ -183,7 +203,8 @@ def get_managed_events(organization_id):
                 'event_id': managed.event_id,
                 'event_name': managed.event_name,
                 'start_date': managed.start_date,
-                'end_date': managed.end_date
+                'end_date': managed.end_date,
+                'phase': managed.phase.name
             }
             managed_orgs.append(data)
         return jsonify({'success': True, 'organization': org_name, 'message': 'Show all events managed by this organization',
