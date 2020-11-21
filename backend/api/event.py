@@ -32,12 +32,22 @@ def get_all_published_event():
 
 
 @app.route('/event/unpublished_list/<path:org_id>', methods=['GET'])
+@requires_auth
 def get_all_unpublished_event(org_id):
     events = db.session.query(Event).filter(or_(Event.phase == EventPhase.INITIALIZED,
                                                 Event.phase == EventPhase.ARCHIVED),
-                                            Event.organization_id == org_id).all()
+                                                Event.organization_id == org_id).all()
+    token = request.headers.get('Authorization')
+    token = token.split()[1]
+    sessionObj = db.session.query(Session).filter(Session.session_id == token).first()
+
+    user = sessionObj.user
+    if user.roles.filter(Role.role == Roles.MEMBER):
+      return {'message': 'You are not allowed to see unpublished event',
+              'success': False}
+
     if events:
-        events_schema = EventSchema()
+        events_schema = EventSchema(many=True)
         result = events_schema.dump(events)
         return jsonify(result=result,
                        success=True)
@@ -47,6 +57,7 @@ def get_all_unpublished_event(org_id):
 
 
 @app.route('/event/add/<path:org_id>', methods=['POST'])
+@requires_auth
 def create_event(org_id):
     token = request.headers.get('Authorization')
     token = token.split()[1]
@@ -147,6 +158,7 @@ def delete_event(event_id):
 
 
 @app.route('/event/register/<path:event_id>', methods=['POST'])
+@requires_auth
 def register_event(event_id):
     """ User register for a organization"""
     # Verified the organization id existed or not
@@ -175,6 +187,7 @@ def register_event(event_id):
 
 
 @app.route('/event/participants/<path:event_id>', methods=['GET'])
+@requires_auth
 def get_all_participants(event_id):
     registers = Registration.query.filter_by(event_id=event_id).all()
     if not registers or registers is None:
@@ -191,7 +204,9 @@ def get_all_participants(event_id):
             participants.append(data)
         return jsonify({'success': True, 'message': 'Show all participants', 'participants': participants})
 
+
 @app.route('/event/unregister/<path:event_id>', methods=['DELETE'])
+@requires_auth
 def unregister_event(event_id):
     """ User register for a organization"""
     # Verified the organization id existed or not
@@ -214,6 +229,7 @@ def unregister_event(event_id):
 
 
 @app.route('/event/approve/<path:event_id>', methods=['PUT'])
+@requires_auth
 def approve_event(event_id):
     token = request.headers.get('Authorization')
     token = token.split()[1]
@@ -243,6 +259,7 @@ def approve_event(event_id):
     return result
 
 @app.route('/event/cancel/<path:event_id>', methods=['PUT'])
+@requires_auth
 def cancel_event(event_id):
     token = request.headers.get('Authorization')
     token = token.split()[1]

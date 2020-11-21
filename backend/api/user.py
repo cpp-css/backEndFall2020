@@ -100,6 +100,7 @@ def signup(name, email, password, **kwargs):
     })
     
 @app.route('/user/change/profile', methods=['PUT'])
+@requires_auth
 #@requires_json
 def change_profile():
     #print('hi')
@@ -141,9 +142,6 @@ def change_profile():
     db.session.commit()
 
     return jsonify({'success': True, 'message': 'You have changed your profile!'});
-
-   
-
 
 @app.route('/user/me', methods=['GET'])
 @requires_auth
@@ -187,7 +185,7 @@ def delete_me(password, **kwargs):
     return jsonify({'success': True, 'message': 'Account successfully deleted'})
 
 
-@app.route('/user/organizations', methods=['GET'])
+@app.route('/user/me/organizations', methods=['GET'])
 @requires_auth
 def get_registered_orgs():
     user_data = request.user.dump()
@@ -198,7 +196,7 @@ def get_registered_orgs():
     return jsonify({'success': True, 'message': 'show my registered organization', 'role': user_data['roles']})
 
 
-@app.route('/user/events', methods=['GET'])
+@app.route('/user/me/events', methods=['GET'])
 @requires_auth
 def get_registered_events():
     token = request.headers.get('Authorization')
@@ -218,8 +216,9 @@ def get_registered_events():
         }
         events.append(data)
     return jsonify({'success': True, 'message': 'show my registered events', 'events': events})
-  
-@app.route('/user/managed_organization', methods=['GET'])
+
+
+@app.route('/user/me/managed_organization', methods=['GET'])
 @requires_auth
 def get_managed_organizations():
     token = request.headers.get('Authorization')
