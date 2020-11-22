@@ -28,20 +28,22 @@ def login(email, password, **kwargs):
     responses:
         200:
             description: OK
-            schema:
-                type: object
-                properties:
-                    success:
-                        type: boolean
-                    message:
-                        type: string
-                    session:
+            content:
+                application/json:
+                    schema:
                         type: object
                         properties:
-                            token:
+                            success:
+                                type: boolean
+                            message:
                                 type: string
-                            expires:
-                                type: string
+                            session:
+                                type: object
+                                properties:
+                                    token:
+                                        type: string
+                                    expires:
+                                        type: string
     '''
     
     try:
@@ -79,20 +81,22 @@ def signup(name, email, password, **kwargs):
     responses:
         200:
             description: OK
-            schema:
-                type: object
-                properties:
-                    success:
-                        type: boolean
-                    message:
-                        type: string
-                    session:
+            content:
+                application/json:
+                    schema:
                         type: object
                         properties:
-                            token:
+                            success:
+                                type: boolean
+                            message:
                                 type: string
-                            expires:
-                                type: string
+                            session:
+                                type: object
+                                properties:
+                                    token:
+                                        type: string
+                                    expires:
+                                        type: string
     '''
     
     # Validate name
@@ -197,25 +201,27 @@ def get_me():
     responses:
         200:
             description: OK
-            schema:
-                type: object
-                properties:
-                    success:
-                        type: boolean
-                    message:
-                        type: string
-                    user:
+            content:
+                application/json:
+                    schema:
                         type: object
                         properties:
-                            name:
+                            success:
+                                type: boolean
+                            message:
                                 type: string
-                            roles:
+                            user:
                                 type: object
                                 properties:
-                                    organization_id:
+                                    name:
                                         type: string
-                                    role:
-                                        type: string
+                                    roles:
+                                        type: object
+                                        properties:
+                                            organization_id:
+                                                type: string
+                                            role:
+                                                type: string
     '''
     
     user_data = request.user.dump()
@@ -235,13 +241,15 @@ def delete_me(password, **kwargs):
     responses:
         200:
             description: OK
-            schema:
-                type: object
-                properties:
-                    success:
-                        type: boolean
-                    message:
-                        type: string
+            content:
+                application/json:
+                    schema:
+                        type: object
+                        properties:
+                            success:
+                                type: boolean
+                            message:
+                                type: string
     '''
     
     user = request.user

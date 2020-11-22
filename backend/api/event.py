@@ -319,20 +319,22 @@ def edit_event(event_id, **kwargs):
     responses:
         200:
             description: OK
-            schema:
-                type: object
-                properties:
-                    success:
-                        type: boolean
-                    message:
-                        type: string
-                    session:
+            content:
+                application/json:
+                    schema:
                         type: object
                         properties:
-                            token:
+                            success:
+                                type: boolean
+                            message:
                                 type: string
-                            expires:
-                                type: string
+                            session:
+                                type: object
+                                properties:
+                                    token:
+                                        type: string
+                                    expires:
+                                        type: string
     '''
     
     user = request.user

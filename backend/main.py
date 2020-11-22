@@ -25,26 +25,28 @@ def hello_world():
     responses:
         200:
             description: OK
-            schema:
-                type: object
-                properties:
-                    version:
-                        type: string
-                        description: A SEMVER version string that includes the git HEAD
-                    authors:
-                        type: array
-                        description: The people behind the magic
-                        items:
-                            type: object
-                            properties:
-                                name:
-                                    type: string
-                                github:
-                                    type: string
-                                email:
-                                    type: string
-                    quote:
-                        type: string
+            content:
+                application/json:
+                    schema:
+                        type: object
+                        properties:
+                            version:
+                                type: string
+                                description: A SEMVER version string that includes the git HEAD
+                            authors:
+                                type: array
+                                description: The people behind the magic
+                                items:
+                                    type: object
+                                    properties:
+                                        name:
+                                            type: string
+                                        github:
+                                            type: string
+                                        email:
+                                            type: string
+                            quote:
+                                type: string
     '''
     shuffle(authors)
 
