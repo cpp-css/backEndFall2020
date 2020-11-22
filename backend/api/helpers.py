@@ -43,14 +43,6 @@ def requires_auth(func):
 
 
 def requires_json(func):
-    # Automatic Swagger documentation magic
-    if not hasattr(func, 'specs_dict'): func.specs_dict = {}
-    if not 'parameters' in func.specs_dict: func.specs_dict['parameters'] = [{
-        'in': 'body',
-        'name': 'body',
-        'required': True
-    }]
-    
     @wraps(func)
     def wrapper(*args, **kwargs):
         body = request.json
