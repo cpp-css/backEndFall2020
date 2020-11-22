@@ -281,6 +281,60 @@ def cancel_event(event_id):
 @requires_auth
 @requires_json # TODO: Centralize validation on event fields input
 def edit_event(event_id, **kwargs):
+    '''
+    Edit an existing event
+    ---
+    tags:
+      - event
+    parameters:
+      - in: body
+        name: body
+        required: true
+        schema:
+          required:
+            - event_name
+            - start_date
+            - end_date
+            - theme
+            - perks
+            - categories
+            - info
+          properties:
+            event_name:
+              type: string
+            start_date:
+              type: string
+              description: An ISO 8601 formatted datetime string
+            end_date:
+              type: string
+              description: An ISO 8601 formatted datetime string
+            theme:
+              type: string
+            perks:
+              type: string
+            categories:
+              type: string
+            info:
+              type: string
+    responses:
+        200:
+            description: OK
+            schema:
+                type: object
+                properties:
+                    success:
+                        type: boolean
+                    message:
+                        type: string
+                    session:
+                        type: object
+                        properties:
+                            token:
+                                type: string
+                            expires:
+                                type: string
+    '''
+    
     user = request.user
     event = db.session.query(Event).filter(Event.event_id == event_id).first()
     role = user.roles.filter(

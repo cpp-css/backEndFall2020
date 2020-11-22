@@ -19,12 +19,39 @@ authors = [
 
 @app.route('/')
 def hello_world():
+    '''
+    Get the application's version string
+    ---
+    responses:
+        200:
+            description: OK
+            schema:
+                type: object
+                properties:
+                    version:
+                        type: string
+                        description: A SEMVER version string that includes the git HEAD
+                    authors:
+                        type: array
+                        description: The people behind the magic
+                        items:
+                            type: object
+                            properties:
+                                name:
+                                    type: string
+                                github:
+                                    type: string
+                                email:
+                                    type: string
+                    quote:
+                        type: string
+    '''
     shuffle(authors)
 
     return {
-        'version': "{version}-{commit}".format(version=VERSION, commit=GIT_COMMIT),
+        'version': '{version}-{commit}'.format(version=VERSION, commit=GIT_COMMIT),
         'authors': authors,
-        'quote': 'Written the the CSSPI Fall 2020 backend team'
+        'quote': 'Written by the CSSPI Fall 2020 backend team'
     }
 
 if __name__ == "__main__":

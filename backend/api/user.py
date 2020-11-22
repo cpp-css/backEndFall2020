@@ -18,8 +18,32 @@ from sqlalchemy.dialects.postgresql import UUID
 
 @app.route('/login', methods=['POST'])
 @requires_json
-@validate_types({'email': str, 'password': str})
+@validate_types({'email': {'type': str}, 'password': {'type': str}})
 def login(email, password, **kwargs):
+    '''
+    Authenticate user credentials
+    ---
+    tags:
+      - user
+    responses:
+        200:
+            description: OK
+            schema:
+                type: object
+                properties:
+                    success:
+                        type: boolean
+                    message:
+                        type: string
+                    session:
+                        type: object
+                        properties:
+                            token:
+                                type: string
+                            expires:
+                                type: string
+    '''
+    
     try:
         email_results = validate_email(email)
         email = '{0}@{1}'.format(email_results.local_part.lower(), email_results.domain)
@@ -45,8 +69,32 @@ def login(email, password, **kwargs):
 
 @app.route('/signup', methods=['POST'])
 @requires_json
-@validate_types({'name': str, 'email': str, 'password': str})
+@validate_types({'name': {'type': str}, 'email': {'type': str}, 'password': {'type': str}})
 def signup(name, email, password, **kwargs):
+    '''
+    Creates a new user
+    ---
+    tags:
+      - user
+    responses:
+        200:
+            description: OK
+            schema:
+                type: object
+                properties:
+                    success:
+                        type: boolean
+                    message:
+                        type: string
+                    session:
+                        type: object
+                        properties:
+                            token:
+                                type: string
+                            expires:
+                                type: string
+    '''
+    
     # Validate name
     min_length = 2
     max_length = User.__table__.c['name'].type.length
@@ -141,6 +189,35 @@ def change_profile():
 @app.route('/user/me', methods=['GET'])
 @requires_auth
 def get_me():
+    '''
+    Retrieves a user's information
+    ---
+    tags:
+      - user
+    responses:
+        200:
+            description: OK
+            schema:
+                type: object
+                properties:
+                    success:
+                        type: boolean
+                    message:
+                        type: string
+                    user:
+                        type: object
+                        properties:
+                            name:
+                                type: string
+                            roles:
+                                type: object
+                                properties:
+                                    organization_id:
+                                        type: string
+                                    role:
+                                        type: string
+    '''
+    
     user_data = request.user.dump()
     return jsonify({'success': True, 'message': '', 'user': user_data})
 
@@ -148,8 +225,25 @@ def get_me():
 @app.route('/user/me', methods=['DELETE'])
 @requires_auth
 @requires_json
-@validate_types({'password': str})
+@validate_types({'password': {'type': str}})
 def delete_me(password, **kwargs):
+    '''
+    Deletes a user and their associated data
+    ---
+    tags:
+      - user
+    responses:
+        200:
+            description: OK
+            schema:
+                type: object
+                properties:
+                    success:
+                        type: boolean
+                    message:
+                        type: string
+    '''
+    
     user = request.user
     if not user.verify_password(password):
         return jsonify({'success': False, 'message': 'Invalid password'})
