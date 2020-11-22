@@ -1,4 +1,5 @@
 import os
+import subprocess
 from dotenv import load_dotenv
 from flask import Flask
 from flask_marshmallow import Marshmallow
@@ -6,6 +7,8 @@ from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 
 load_dotenv(verbose=True)
+VERSION = "1.0.0" # SEMVER
+GIT_COMMIT = subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD']).decode('utf-8').strip()
 
 # assume we're in production unless told otherwise
 DEBUG = (os.getenv('DEBUG', 'false') == 'true')
