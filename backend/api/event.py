@@ -37,11 +37,7 @@ def get_all_unpublished_event(org_id):
     events = db.session.query(Event).filter(or_(Event.phase == EventPhase.INITIALIZED,
                                                 Event.phase == EventPhase.ARCHIVED),
                                                 Event.organization_id == org_id).all()
-    token = request.headers.get('Authorization')
-    token = token.split()[1]
-    sessionObj = db.session.query(Session).filter(Session.session_id == token).first()
-
-    user = sessionObj.user
+    user = request.user
     if user.roles.filter(Role.role == Roles.MEMBER):
       return {'message': 'You are not allowed to see unpublished event',
               'success': False}
@@ -59,9 +55,7 @@ def get_all_unpublished_event(org_id):
 @app.route('/event/add/<path:org_id>', methods=['POST'])
 @requires_auth
 def create_event(org_id):
-    token = request.headers.get('Authorization')
-    token = token.split()[1]
-    sessionObj = db.session.query(Session).filter(Session.session_id == token).first()
+    sessionObj = request.session
     creator_id = sessionObj.user_id
 
     roleObj = db.session.query(Role).filter(Role.user_id == creator_id,
@@ -131,9 +125,7 @@ def delete_event(event_id):
                        message="The event does not exists.")
     else:
         # Get the session token
-        token = request.headers.get('Authorization')
-        token = token.split()[1]
-        sessionObj = db.session.query(Session).filter(Session.session_id == token).first()
+        sessionObj = request.session
         # print("...SESSION TOKEN...")
         # print(sessionObj)
         user_role = db.session.query(Role).filter(Role.organization_id == event.organization_id,
@@ -167,9 +159,7 @@ def register_event(event_id):
         return jsonify(success=False,
                        message="The event does not exists.")
     else:
-        token = request.headers.get('Authorization')
-        token = token.split()[1]
-        sessionObj = db.session.query(Session).filter(Session.session_id == token).first()
+        sessionObj = request.session
         #print("...SESSION TOKEN...")
         #print(sessionObj)
         register_id = sessionObj.user_id
@@ -212,9 +202,7 @@ def unregister_event(event_id):
     # Verified the organization id existed or not
     event_obj = Event.query.filter_by(event_id=event_id).first()
     event_name = event_obj.event_name
-    token = request.headers.get('Authorization')
-    token = token.split()[1]
-    sessionObj = db.session.query(Session).filter(Session.session_id == token).first()
+    sessionObj = request.session
     register_obj = db.session.query(Registration).filter(Registration.register_id == sessionObj.user_id,
                                                          Registration.event_id == event_id).first()
 
@@ -231,9 +219,7 @@ def unregister_event(event_id):
 @app.route('/event/approve/<path:event_id>', methods=['PUT'])
 @requires_auth
 def approve_event(event_id):
-    token = request.headers.get('Authorization')
-    token = token.split()[1]
-    sessionObj = db.session.query(Session).filter(Session.session_id == token).first()
+    sessionObj = request.session
     creator_id = sessionObj.user_id
     eventObj = db.session.query(Event).filter(Event.event_id == event_id).first()
 
@@ -261,9 +247,7 @@ def approve_event(event_id):
 @app.route('/event/cancel/<path:event_id>', methods=['PUT'])
 @requires_auth
 def cancel_event(event_id):
-    token = request.headers.get('Authorization')
-    token = token.split()[1]
-    sessionObj = db.session.query(Session).filter(Session.session_id == token).first()
+    sessionObj = request.session
     creator_id = sessionObj.user_id
     eventObj = db.session.query(Event).filter(Event.event_id == event_id).first()
     if eventObj is None or not eventObj:
@@ -318,4 +302,3 @@ def edit_event(event_id, **kwargs):
 
     db.session.commit()
     return {'success': True, 'message': '', 'event': EventSchema().dump(event)}
-
