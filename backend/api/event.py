@@ -246,8 +246,8 @@ def approve_event(event_id):
         return {'message': "You do not have any role in this organization",
                 'success': False}
 
-    if roleObj.role != Roles.CHAIRMAN:
-        return {'message': 'You need to be an CHAIRMAN in this organization to approve events',
+    if roleObj.role != Roles.CHAIRMAN and roleObj.role != Roles.ADMIN:
+        return {'message': 'You need to be an admin/chairperson in this organization to approve events',
                 'success': False}
     eventObj.phase = EventPhase.APPROVED
     db.session.commit()
@@ -318,4 +318,3 @@ def edit_event(event_id, **kwargs):
 
     db.session.commit()
     return {'success': True, 'message': '', 'event': EventSchema().dump(event)}
-
