@@ -10,3 +10,4 @@ email-validator==1.1.1
 marshmallow-sqlalchemy==0.24.0
 marshmallow-enum==1.5.1
 colorlog==4.6.0
+flasgger==0.9.5

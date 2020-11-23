@@ -28,7 +28,7 @@ def handle_http_exception(e):
     elif DEBUG:
         # Error caught by Flask
         body['message'] = '[DEBUG] {0}'.format(debug_message)
-        body['traceback'] = format_tb(traceback)
+        body['traceback'] = traceback
     elif 'message' in e.description:
         # Specific user displayable error
         body['message'] = e.description['message']

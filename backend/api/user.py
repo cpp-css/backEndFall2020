@@ -18,8 +18,34 @@ from sqlalchemy.dialects.postgresql import UUID
 
 @app.route('/login', methods=['POST'])
 @requires_json
-@validate_types({'email': str, 'password': str})
+@validate_types({'email': {'type': str}, 'password': {'type': str}})
 def login(email, password, **kwargs):
+    '''
+    Authenticate user credentials
+    ---
+    tags:
+      - user
+    responses:
+        200:
+            description: OK
+            content:
+                application/json:
+                    schema:
+                        type: object
+                        properties:
+                            success:
+                                type: boolean
+                            message:
+                                type: string
+                            session:
+                                type: object
+                                properties:
+                                    token:
+                                        type: string
+                                    expires:
+                                        type: string
+    '''
+    
     try:
         email_results = validate_email(email)
         email = '{0}@{1}'.format(email_results.local_part.lower(), email_results.domain)
@@ -45,8 +71,34 @@ def login(email, password, **kwargs):
 
 @app.route('/signup', methods=['POST'])
 @requires_json
-@validate_types({'name': str, 'email': str, 'password': str})
+@validate_types({'name': {'type': str}, 'email': {'type': str}, 'password': {'type': str}})
 def signup(name, email, password, **kwargs):
+    '''
+    Creates a new user
+    ---
+    tags:
+      - user
+    responses:
+        200:
+            description: OK
+            content:
+                application/json:
+                    schema:
+                        type: object
+                        properties:
+                            success:
+                                type: boolean
+                            message:
+                                type: string
+                            session:
+                                type: object
+                                properties:
+                                    token:
+                                        type: string
+                                    expires:
+                                        type: string
+    '''
+    
     # Validate name
     min_length = 2
     max_length = User.__table__.c['name'].type.length
@@ -104,12 +156,7 @@ def signup(name, email, password, **kwargs):
 #@requires_json
 def change_profile():
     #print('hi')
-    token = request.headers.get('Authorization')
-    token = token.split()[1]
-    sessionObj = db.session.query(Session).filter(Session.session_id == token).first()
-    user_id = sessionObj.user_id
-
-    userObj = db.session.query(User).filter(User.user_id == user_id).first()
+    userObj = request.user
     
     input_data = request.json
     
@@ -146,6 +193,37 @@ def change_profile():
 @app.route('/user/me', methods=['GET'])
 @requires_auth
 def get_me():
+    '''
+    Retrieves a user's information
+    ---
+    tags:
+      - user
+    responses:
+        200:
+            description: OK
+            content:
+                application/json:
+                    schema:
+                        type: object
+                        properties:
+                            success:
+                                type: boolean
+                            message:
+                                type: string
+                            user:
+                                type: object
+                                properties:
+                                    name:
+                                        type: string
+                                    roles:
+                                        type: object
+                                        properties:
+                                            organization_id:
+                                                type: string
+                                            role:
+                                                type: string
+    '''
+    
     user_data = request.user.dump()
     return jsonify({'success': True, 'message': '', 'user': user_data})
 
@@ -153,8 +231,27 @@ def get_me():
 @app.route('/user/me', methods=['DELETE'])
 @requires_auth
 @requires_json
-@validate_types({'password': str})
+@validate_types({'password': {'type': str}})
 def delete_me(password, **kwargs):
+    '''
+    Deletes a user and their associated data
+    ---
+    tags:
+      - user
+    responses:
+        200:
+            description: OK
+            content:
+                application/json:
+                    schema:
+                        type: object
+                        properties:
+                            success:
+                                type: boolean
+                            message:
+                                type: string
+    '''
+    
     user = request.user
     if not user.verify_password(password):
         return jsonify({'success': False, 'message': 'Invalid password'})
@@ -199,11 +296,7 @@ def get_registered_orgs():
 @app.route('/user/me/events', methods=['GET'])
 @requires_auth
 def get_registered_events():
-    token = request.headers.get('Authorization')
-    token = token.split()[1]
-    session_obj = db.session.query(Session).filter(Session.session_id == token).first()
-    curr_user = session_obj.user_id
-    register_obj = db.session.query(Registration).filter(Registration.register_id == curr_user).all()
+    register_obj = db.session.query(Registration).filter(Registration.register_id == request.user.user_id).all()
     #print("...DEBUGGING...")
     #print(register_obj)
     events = []
@@ -221,12 +314,10 @@ def get_registered_events():
 @app.route('/user/me/managed_organization', methods=['GET'])
 @requires_auth
 def get_managed_organizations():
-    token = request.headers.get('Authorization')
-    token = token.split()[1]
-    session_obj = db.session.query(Session).filter(Session.session_id == token).first()
-    managed_obj = db.session.query(Role).filter(Role.user_id == session_obj.user_id,
+    user = request.user
+    managed_obj = db.session.query(Role).filter(Role.user_id == user.user_id,
                                                 or_(Role.role == Roles.ADMIN, Role.role == Roles.CHAIRMAN)).all()
-    print (session_obj.user_id)
+    print (user.user_id)
     print(managed_obj)
     managed_orgs = []
     if managed_obj:
@@ -240,4 +331,3 @@ def get_managed_organizations():
         return jsonify({'success': True, 'message': 'Showing organizations managed by you', 'managed_orgs': managed_orgs})
     else:
         return jsonify({'success': False, 'message': 'You do not manage any organizations'})
-

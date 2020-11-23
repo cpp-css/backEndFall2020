@@ -6,12 +6,19 @@ from config import DEBUG, db
 from database.session import Session
 from database.user import User
 
+if DEBUG: from config import swagger
 
 def all_helper():
     return None
 
 
 def requires_auth(func):
+    # Automatic Swagger documentation magic
+    if not hasattr(func, 'specs_dict'): func.specs_dict = {}
+    func.specs_dict.update({
+        'security': [{'bearerAuth': []}]
+    })
+    
     @wraps(func)
     def wrapper(*args, **kwargs):
         raw_auth = request.headers.get('Authorization')
@@ -49,13 +56,35 @@ def requires_json(func):
 
 def validate_types(expected):
     def _validate_types(func):
+        # Automatic Swagger documentation magic
+        if not hasattr(func, 'specs_dict'): func.specs_dict = {}
+        if not 'parameters' in func.specs_dict: func.specs_dict['parameters'] = [{
+            'in': 'body',
+            'name': 'body',
+            'required': True
+        }]
+        
+        TYPE_MAP = {str: 'string', int: 'integer', float: 'number',
+                    bool: 'boolean'}
+        
+        schema = {
+            'required': list(expected.keys()),
+            'properties': {}
+        }
+        
+        for key, data in expected.items():
+            schema['properties'][key] = {'type': TYPE_MAP[data['type']]}
+        
+        func.specs_dict['parameters'][0].update({'schema': schema})
+        
+        
         @wraps(func)
         def wrapper(*args, **body):
             # Check each type and add to invalid if not correct
             invalid = {}
-            for key, type in expected.items():
-                if (not key in body or not isinstance(body[key], type)):
-                    invalid[key] = type
+            for key, data in expected.items():
+                if (not key in body or not isinstance(body[key], data['type'])):
+                    invalid[key] = data['type']
 
             # if there's any invalid fields, respond with an error
             if (len(invalid) > 0):

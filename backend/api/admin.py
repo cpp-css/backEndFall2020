@@ -1,3 +1,4 @@
+from api.helpers import requires_auth
 from config import app, db
 from database.organization import Organization
 from database.role import Role, Roles
@@ -26,10 +27,9 @@ def show_board(org_id):
 
 
 @app.route('/organization/make_admin/<path:org_id>', methods=['POST'])
+@requires_auth
 def make_admin(org_id):
-    token = request.headers.get('Authorization')
-    token = token.split()[1]
-    sessionObj = db.session.query(Session).filter(Session.session_id == token).first()
+    sessionObj = request.session
     current_role = Role.query.filter_by(organization_id=org_id, user_id=sessionObj.user_id).first()
     print("DEBUG....")
     print(current_role)
@@ -64,10 +64,9 @@ def make_admin(org_id):
 
 
 @app.route('/admins/remove_admin/<path:org_id>', methods=['DELETE'])
+@requires_auth
 def remove_admin(org_id):
-    token = request.headers.get('Authorization')
-    token = token.split()[1]
-    sessionObj = db.session.query(Session).filter(Session.session_id == token).first()
+    sessionObj = request.session
     current_role = Role.query.filter_by(organization_id=org_id, user_id=sessionObj.user_id).first()
     print("DEBUG....")
     print(current_role)
@@ -91,4 +90,3 @@ def remove_admin(org_id):
 
         else:
             return jsonify(message='You do not allow to remove admin', success=False)
-
