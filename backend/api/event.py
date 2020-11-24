@@ -19,10 +19,55 @@ from sqlalchemy import update
 
 @app.route('/event/published_list', methods=['GET'])
 def get_all_published_event():
+    """
+    Show all published event
+    ---
+    tags:
+      - event
+    response:
+        200:
+            description: OK
+            content:
+                application/json:
+                    schema:
+                        type: object
+                        properties:
+                            success:
+                                type: boolean
+                            result:
+                                type: array
+                                items:
+                                    type: object
+                                    properties:
+                                        categories:
+                                            type: string
+                                        contact_id:
+                                            type: string
+                                        creator_id:
+                                            type: string
+                                        end_date:
+                                            type: string
+                                        event_id:
+                                            type: string
+                                        event_name:
+                                            type: string
+                                        info:
+                                            type: string
+                                        organization_id:
+                                            type: string
+                                        perks:
+                                            type: string
+                                        phase:
+                                            type: integer
+                                        start_date:
+                                            type: string
+                                        theme:
+                                            type: string
+    """
     events = db.session.query(Event).filter(Event.phase == EventPhase.APPROVED).all()
     if events:
         events_schema = EventSchema(many=True)
-        #events = events.schema.dump(self)
+        # events = events.schema.dump(self)
         result = events_schema.dump(events)
         return jsonify(result=result,
                        success=True)
@@ -34,13 +79,63 @@ def get_all_published_event():
 @app.route('/event/unpublished_list/<path:org_id>', methods=['GET'])
 @requires_auth
 def get_all_unpublished_event(org_id):
+    """
+        Show all unpublished events by organization (only chairman and admin allow to see the list)
+        ---
+        tags:
+          - event
+        response:
+            200:
+                description: OK
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                success:
+                                    type: boolean
+                                result:
+                                    type: array
+                                    items:
+                                        type: object
+                                        properties:
+                                            categories:
+                                                type: string
+                                            contact_id:
+                                                type: string
+                                            creator_id:
+                                                type: string
+                                            end_date:
+                                                type: string
+                                            event_id:
+                                                type: string
+                                            event_name:
+                                                type: string
+                                            info:
+                                                type: string
+                                            organization_id:
+                                                type: string
+                                            perks:
+                                                type: string
+                                            phase:
+                                                type: integer
+                                            start_date:
+                                                type: string
+                                            theme:
+                                                type: string
+        """
     events = db.session.query(Event).filter(or_(Event.phase == EventPhase.INITIALIZED,
                                                 Event.phase == EventPhase.ARCHIVED),
-                                                Event.organization_id == org_id).all()
+                                            Event.organization_id == org_id).all()
+
     user = request.user
+    print("TESTING--------")
+    print(Role.role)
+    print("TESTING--------")
+
     if user.roles.filter(Role.role == Roles.MEMBER):
-      return {'message': 'You are not allowed to see unpublished event',
-              'success': False}
+        return {'message': 'You are not allowed to see unpublished event',
+                'success': False}
 
     if events:
         events_schema = EventSchema(many=True)
@@ -118,6 +213,24 @@ def create_event(org_id):
 @app.route('/event/delete_event/<path:event_id>', methods=['DELETE'])
 @requires_auth
 def delete_event(event_id):
+    """
+        Delete an unpublished event.
+        ---
+        tags:
+            - events
+        response:
+            200:
+                description: OK
+                content:
+                application/json:
+                    schema:
+                        type: object
+                        properties:
+                            success:
+                                type: boolean
+                            message:
+                                type: string
+    """
     # Verified the organization id existed or not
     event = Event.query.filter_by(event_id=event_id).first()
     if event is None or not event:
@@ -137,8 +250,8 @@ def delete_event(event_id):
                 return jsonify(success=False,
                                message="The event is published so it cannot be deleted.")
 
-            #notifications = Notification.query.filter_by(event_id=event_id).all()
-            #db.session.delete(notifications)
+            # notifications = Notification.query.filter_by(event_id=event_id).all()
+            # db.session.delete(notifications)
 
             db.session.delete(event)
             db.session.commit()
@@ -160,8 +273,8 @@ def register_event(event_id):
                        message="The event does not exists.")
     else:
         sessionObj = request.session
-        #print("...SESSION TOKEN...")
-        #print(sessionObj)
+        # print("...SESSION TOKEN...")
+        # print(sessionObj)
         register_id = sessionObj.user_id
         exist_register = Registration.query.filter_by(event_id=event_obj.event_id, register_id=register_id).first()
         if exist_register:
@@ -179,6 +292,33 @@ def register_event(event_id):
 @app.route('/event/participants/<path:event_id>', methods=['GET'])
 @requires_auth
 def get_all_participants(event_id):
+    """
+        Show all participants of a specific event.
+        ---
+        tags:
+            - event
+        response:
+            200:
+                description: OK
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                success:
+                                    type: boolean
+                                message:
+                                    type: string
+                                participants:
+                                    type: array
+                                    items:
+                                        type: object
+                                        properties:
+                                            name:
+                                                type: String
+                                            user_id:
+                                                type: string
+    """
     registers = Registration.query.filter_by(event_id=event_id).all()
     if not registers or registers is None:
         return {'message': 'There is no participant.',
@@ -213,7 +353,7 @@ def unregister_event(event_id):
         db.session.delete(register_obj)
         db.session.commit()
         return jsonify(success=True,
-                        message="You successfully unregister for " + event_name)
+                       message="You successfully unregister for " + event_name)
 
 
 @app.route('/event/approve/<path:event_id>', methods=['PUT'])
@@ -243,6 +383,7 @@ def approve_event(event_id):
               'success': True}
 
     return result
+
 
 @app.route('/event/cancel/<path:event_id>', methods=['PUT'])
 @requires_auth
@@ -277,11 +418,12 @@ def cancel_event(event_id):
 
     return result
 
+
 @app.route('/event/<path:event_id>', methods=['POST'])
 @requires_auth
-@requires_json # TODO: Centralize validation on event fields input
+@requires_json  # TODO: Centralize validation on event fields input
 def edit_event(event_id, **kwargs):
-    '''
+    """
     Edit an existing event
     ---
     tags:
@@ -335,8 +477,8 @@ def edit_event(event_id, **kwargs):
                                         type: string
                                     expires:
                                         type: string
-    '''
-    
+    """
+
     user = request.user
     event = db.session.query(Event).filter(Event.event_id == event_id).first()
     role = user.roles.filter(
@@ -346,11 +488,11 @@ def edit_event(event_id, **kwargs):
 
     if role == None:
         return {'success': False, 'message': 'You don\'t have permission to do that!'}, 403
-        
+
     # Perform post-processing/sanitization of fields
     kwargs['start_date'] = datetime.fromisoformat(kwargs['start_date'])
     kwargs['end_date'] = datetime.fromisoformat(kwargs['end_date'])
-    
+
     # Only unpack certain fields to prevent other fields from being edited
     permitted_keys = ['event_name', 'start_date', 'end_date', 'theme', 'perks', 'categories', 'info']
     for key, value in kwargs.items():
