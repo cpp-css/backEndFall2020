@@ -129,11 +129,8 @@ def get_all_unpublished_event(org_id):
                                             Event.organization_id == org_id).all()
 
     user = request.user
-    print("TESTING--------")
-    print(Role.role)
-    print("TESTING--------")
-
-    if user.roles.filter(Role.role == Roles.MEMBER):
+    member = db.session.query(Role).filter(Role.user_id == user.user_id).first()
+    if member.role == Roles.MEMBER:
         return {'message': 'You are not allowed to see unpublished event',
                 'success': False}
 
