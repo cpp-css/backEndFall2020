@@ -1,4 +1,4 @@
-from config import db
+from config import db, ma
 from sqlalchemy.dialects.postgresql import UUID
 import uuid
 
@@ -10,9 +10,9 @@ class Contact(db.Model):
     __tablename__ = 'Contact'
     contact_id = db.Column(UUID(as_uuid=True), default=uuid.uuid4, primary_key=True, nullable=False)
     dob = db.Column(db.DateTime)
-    phone = db.Column(db.Integer)
+    phone = db.Column(db.BigInteger)
     address = db.Column(db.String(250))
-    state = db.Column(db.String(10))
+    state = db.Column(db.String(250))
     zipcode = db.Column(db.Integer)
     country = db.Column(db.String(250))
     organization_id = db.Column(UUID(as_uuid=True), db.ForeignKey('Organization.organization_id'))
@@ -26,3 +26,8 @@ class Contact(db.Model):
         self.state = state
         self.zipcode = zipcode
         self.country = country'''
+
+
+class ContactSchema(ma.Schema):
+    class Meta:
+        fields = ('contact_id', 'dob', 'phone', 'address', 'state', 'zipcode', 'country', 'organization_id')
