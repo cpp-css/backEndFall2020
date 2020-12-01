@@ -26,24 +26,24 @@ def login(email, password, **kwargs):
     tags:
       - user
     responses:
-        200:
-            description: OK
-            content:
-                application/json:
-                    schema:
-                        type: object
-                        properties:
-                            success:
-                                type: boolean
-                            message:
-                                type: string
-                            session:
-                                type: object
-                                properties:
-                                    token:
-                                        type: string
-                                    expires:
-                                        type: string
+      200:
+        description: OK
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                message:
+                  type: string
+                session:
+                  type: object
+                  properties:
+                    token:
+                      type: string
+                    expires:
+                      type: string
     '''
     
     try:
@@ -79,24 +79,24 @@ def signup(name, email, password, **kwargs):
     tags:
       - user
     responses:
-        200:
-            description: OK
-            content:
-                application/json:
-                    schema:
-                        type: object
-                        properties:
-                            success:
-                                type: boolean
-                            message:
-                                type: string
-                            session:
-                                type: object
-                                properties:
-                                    token:
-                                        type: string
-                                    expires:
-                                        type: string
+      200:
+        description: OK
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                message:
+                  type: string
+                session:
+                  type: object
+                  properties:
+                    token:
+                      type: string
+                    expires:
+                      type: string
     '''
     
     # Validate name
@@ -199,29 +199,29 @@ def get_me():
     tags:
       - user
     responses:
-        200:
-            description: OK
-            content:
-                application/json:
-                    schema:
-                        type: object
-                        properties:
-                            success:
-                                type: boolean
-                            message:
-                                type: string
-                            user:
-                                type: object
-                                properties:
-                                    name:
-                                        type: string
-                                    roles:
-                                        type: object
-                                        properties:
-                                            organization_id:
-                                                type: string
-                                            role:
-                                                type: string
+      200:
+        description: OK
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                message:
+                  type: string
+                user:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                    roles:
+                      type: object
+                      properties:
+                        organization_id:
+                          type: string
+                        role:
+                          type: string
     '''
     
     user_data = request.user.dump()
@@ -239,17 +239,17 @@ def delete_me(password, **kwargs):
     tags:
       - user
     responses:
-        200:
-            description: OK
-            content:
-                application/json:
-                    schema:
-                        type: object
-                        properties:
-                            success:
-                                type: boolean
-                            message:
-                                type: string
+      200:
+        description: OK
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                message:
+                  type: string
     '''
     
     user = request.user

@@ -16,33 +16,33 @@ from datetime import datetime
 @app.route('/organization/list', methods=['GET'])
 def get_all_org():
     """
-    Return all organizations
-    ---
-    tags:
-        - organization
-    response:
-        200:
-            description: OK
-                content:
-                    application/json:
-                        schema:
-                            type: object
-                            properties:
-                                success:
-                                    type: boolean
-                                result:
-                                    type: array
-                                    items:
-                                        type: object
-                                        properties:
-                                            categories:
-                                                type: string
-                                            contact_id:
-                                                type: string
-                                            org_name:
-                                                type: string
-                                            organization:
-                                                type: string
+  Return all organizations
+  ---
+  tags:
+    - organization
+  responses:
+    200:
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+              result:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    categories:
+                      type: string
+                    contact_id:
+                      type: string
+                    org_name:
+                      type: string
+                    organization:
+                      type: string
     """
     organizations = Organization.query.all()
     organizations_schema = OrganizationSchema(many=True)
@@ -56,47 +56,47 @@ def get_all_published_events(org_id):
     """
     Show all published events of an events
     ---
-        tags:
-          - event
-        response:
-            200:
-                description: OK
-                content:
-                    application/json:
-                        schema:
-                            type: object
-                            properties:
-                                success:
-                                    type: boolean
-                                result:
-                                    type: array
-                                    items:
-                                        type: object
-                                        properties:
-                                            categories:
-                                                type: string
-                                            contact_id:
-                                                type: string
-                                            creator_id:
-                                                type: string
-                                            end_date:
-                                                type: string
-                                            event_id:
-                                                type: string
-                                            event_name:
-                                                type: string
-                                            info:
-                                                type: string
-                                            organization_id:
-                                                type: string
-                                            perks:
-                                                type: string
-                                            phase:
-                                                type: integer
-                                            start_date:
-                                                type: string
-                                            theme:
-                                                type: string
+    tags:
+      - organization
+    responses:
+      200:
+        description: OK
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                result:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      categories:
+                        type: string
+                      contact_id:
+                        type: string
+                      creator_id:
+                        type: string
+                      end_date:
+                        type: string
+                      event_id:
+                        type: string
+                      event_name:
+                        type: string
+                      info:
+                        type: string
+                      organization_id:
+                        type: string
+                      perks:
+                        type: string
+                      phase:
+                        type: integer
+                      start_date:
+                        type: string
+                      theme:
+                        type: string
     """
     # Verify the organize exists.
     organization = Organization.query.filter_by(organization_id=org_id).first()
@@ -122,34 +122,34 @@ def get_org_info(org_id):
     Show an organization's details
     ---
     tags:
-      - event
-    response:
-        200:
-            description: OK
-            content:
-                application/json:
-                    schema:
-                        type: object
-                        properties:
-                            board:
-                                type: array
-                                item:
-                                    type: object
-                                    properties:
-                                        name:
-                                            type: string
-                                        role:
-                                            type: string
-                                        user_id:
-                                            type: string
-                            categories:
-                                type: string
-                            org_name:
-                                type: string
-                            organization_id:
-                                type: string
-                            success:
-                                type: boolean
+      - organization
+    responses:
+      200:
+        description: OK
+        content:
+          application/json:
+            schema:
+            type: object
+            properties:
+              board:
+                type: array
+              item:
+                type: object
+                properties:
+                  name:
+                    type: string
+                  role:
+                    type: string
+                  user_id:
+                    type: string
+                  categories:
+                    type: string
+                  org_name:
+                    type: string
+                  organization_id:
+                    type: string
+                  success:
+                    type: boolean
     """
     # Verify the organize exists.
     organization = Organization.query.filter_by(organization_id=org_id).first()
@@ -209,55 +209,47 @@ def add_org():
     Create a new organization
     ---
     tags:
-        organization
-    parameter:
-        - in: body
-            name: organization
-            description: new organization
-            require: true
+      - organization
+    parameters:
+      - in: body
+        name: body
+        required: true
+        schema:
+          required:
+            - org_name
+            - categories
+            - contact
+          properties:
+            org_name:
+              type: string
+            categories:
+              type: string
+            contact:
+              type: object
+              properties:
+                address:
+                  type: string
+                state:
+                  type: string
+                zipcode:
+                  type: integer
+                country:
+                  type: string
+                dob:
+                  type: string
+                  description: An ISO 8601 formatted datetime string
+    responses:
+      200:
+        description: OK
+        content:
+          application/json:
             schema:
-                type: object
-                required:
-                    - org_name
-                    - categories
-                    - contact
-                properties:
-                    org_name:
-                        type: string
-                    categories:
-                        type: string
-                    contact:
-                        type: object
-                        required:
-                            - address
-                            - state
-                            - zipcode
-                            - country
-                            - dob
-                        properties:
-                            address:
-                                type: string
-                            state:
-                                type: string
-                            zipcode
-                                type: integer
-                            country:
-                                type: string
-                            dob:
-                                type: string
-                                description: An ISO 8601 formatted datetime string
-    response:
-        200:
-            description: OK
-            content:
-                application/json:
-                    schema:
-                        type: object
-                        properties:
-                            success:
-                                type: boolean
-                            message:
-                                type: string
+              type: object
+              properties:
+                success:
+                  type: boolean
+                message:
+                  type: string
     """
     sessionObj = request.session
 
@@ -295,19 +287,19 @@ def register_org(org_id):
     Register an organization.
     ---
     tags:
-        - organization
-    response:
-        200:
-            description: OK
-            content:
-                application/json:
-                    schema:
-                        type: object
-                        properties:
-                            success:
-                                type: boolean
-                            message:
-                                type: string
+      - organization
+    responses:
+      200:
+        description: OK
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                message:
+                  type: string
     """
     organization = Organization.query.filter_by(organization_id=org_id).first()
     if organization is None:
@@ -337,19 +329,18 @@ def unregister_org(org_id):
     Unregister an organization or chairman resign
     ---
     tags:
-        - organization
-    parameter:
-        - in: body
-            name: email
-            description: required if the user is Chairman
-            required: false
-            schema:
-                required:
-                    - email
-                properties:
-                    email:
-                        type: string
-    response:
+      - organization
+    parameters:
+      - in: body
+        name: email
+        required: false
+        schema:
+          required:
+            - email
+          properties:
+            email:
+              type: string
+    responses:
         200:
             description: OK
             content:
