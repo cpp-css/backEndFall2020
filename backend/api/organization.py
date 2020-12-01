@@ -2,7 +2,7 @@ from config import app, db
 
 from api.helpers import *
 from database.organization import Organization, OrganizationSchema
-from database.contact import Contact
+from database.contact import Contact, ContactSchema
 from database.user import User
 from database.role import Role, Roles
 from database.session import Session
@@ -128,6 +128,77 @@ def add_org():
         return jsonify(result)
 
 
+@app.route('/organization/edit/<path:org_id>', methods=['PUT'])
+@requires_auth
+def edit_org(org_id):
+    organization = Organization.query.filter_by(organization_id=org_id).first()
+    if organization:
+        sessionObj = request.session
+
+        current_role = Role.query.filter_by(organization_id=org_id, user_id=sessionObj.user_id).first()
+        if current_role.role == Roles.CHAIRMAN:  
+            input_data = request.json
+            org_name_data = input_data['org_name']
+            categories_data = input_data['categories']
+            exist_name = Organization.query.filter_by(org_name=org_name_data).first()
+            if exist_name:
+                return jsonify(message='This name is already taken. Please choose another name.', success=False)
+            else:
+                organization.org_name = org_name_data
+                organization.categories = categories_data
+                db.session.commit()
+
+                organizations_schema = OrganizationSchema()
+                result = {'message': organizations_schema.dump(organization),
+                    'success': True}
+                return jsonify(result)
+        else:
+            return jsonify(success=False,
+                           message="You are not a chairman.")
+    else:
+        return jsonify(success=False,
+                       message="The organization does not exists.")
+
+
+@app.route('/organization/edit/contact/<path:org_id>', methods=['PUT'])
+@requires_auth
+def edit_contact(org_id):
+    organization = Organization.query.filter_by(organization_id=org_id).first()
+    if organization:
+        sessionObj = request.session
+
+        current_role = Role.query.filter_by(organization_id=org_id, user_id=sessionObj.user_id).first()
+        if current_role.role == Roles.CHAIRMAN:  
+            input_data = request.json
+            dob_data = input_data['dob']
+            phone_data = input_data['phone']
+            address_data = input_data['address']
+            state_data = input_data['state']
+            zipcode_data = input_data['zipcode']
+            country_data = input_data['country']
+
+            contact = Contact.query.filter_by(contact_id=organization.contact_id).first()
+
+            contact.dob=dob_data
+            contact.phone=phone_data
+            contact.address=address_data
+            contact.state=state_data
+            contact.zipcode=zipcode_data
+            contact.country=country_data
+            db.session.commit()
+
+            contact_schema = ContactSchema()
+            result = {'message': contact_schema.dump(contact),
+                  'success': True}
+            return jsonify(result)
+        else:
+            return jsonify(success=False,
+                           message="You are not a chairman.")
+    else:
+        return jsonify(success=False,
+                       message="The organization does not exists.")
+
+
 @app.route('/organization/register/<path:org_id>', methods=['POST'])
 @requires_auth
 def register_org(org_id):
@@ -190,6 +261,7 @@ def unregister_org(org_id):
                 db.session.commit()
                 return jsonify(success=True,
                                message="We will miss you.")
+
 
 @app.route('/organization/managed_events/<path:organization_id>', methods=['GET'])
 def get_managed_events(organization_id):
