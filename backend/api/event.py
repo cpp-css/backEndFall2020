@@ -156,8 +156,8 @@ def create_event(org_id):
         return {'message': "You do not have any role in this organization",
                 'success': False}
 
-    if roleObj.role != Roles.ADMIN:
-        return {'message': 'You need to be an ADMIN in this organization to create events',
+    if roleObj.role != Roles.ADMIN and roleObj.role != Roles.CHAIRMAN:
+        return {'message': 'You need to be an administrator or chairperson in this organization to create events',
                 'success': False}
 
     userObj = sessionObj.user

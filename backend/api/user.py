@@ -13,7 +13,7 @@ from database.role import Role, Roles
 from database.session import Session
 from database.user import User
 from database.organization import Organization, OrganizationSchema
-from database.event import Event
+from database.event import Event, EventSchema
 from sqlalchemy.dialects.postgresql import UUID
 
 @app.route('/login', methods=['POST'])
@@ -299,24 +299,11 @@ def get_registered_events():
     register_obj = db.session.query(Registration).filter(Registration.register_id == request.user.user_id).all()
     #print("...DEBUGGING...")
     #print(register_obj)
+    event_schema = EventSchema()
     events = []
     for registered in register_obj:
         event_obj = db.session.query(Event).filter(Event.event_id == registered.event_id).first()
-        data = {
-            'categories': event_obj.categories,
-            'contact_id': event_obj.contact_id,
-            'creator_id': event_obj.creator_id,
-            'start_date': event_obj.start_date,
-            'end_date': event_obj.end_date,
-            'perk': event_obj.perk,
-            'phase': event_obj.phase,
-            'info': event_obj.info,
-            'organization_id': event_obj.organization_id,
-            'event_id': registered.event_id,
-            'event_name': event_obj.event_name,
-            'created_at': registered.created_at
-        }
-        events.append(data)
+        events.append(event_schema.dump(event_obj))
     return jsonify({'success': True, 'message': 'show my registered events', 'events': events})
 
 
