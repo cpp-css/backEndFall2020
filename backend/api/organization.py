@@ -2,7 +2,7 @@ from config import app, db
 
 from api.helpers import *
 from database.organization import Organization, OrganizationSchema
-from database.contact import Contact
+from database.contact import Contact, ContactSchema
 from database.user import User
 from database.role import Role, Roles
 from database.session import Session
@@ -15,142 +15,33 @@ from datetime import datetime
 
 @app.route('/organization/list', methods=['GET'])
 def get_all_org():
-    """
-    Return all organizations
-    ---
-    tags:
-        - organization
-    response:
-        200:
-            description: OK
-                content:
-                    application/json:
-                        schema:
-                            type: object
-                            properties:
-                                success:
-                                    type: boolean
-                                result:
-                                    type: array
-                                    items:
-                                        type: object
-                                        properties:
-                                            categories:
-                                                type: string
-                                            contact_id:
-                                                type: string
-                                            org_name:
-                                                type: string
-                                            organization:
-                                                type: string
-    """
+    """ Return all organizations """
     organizations = Organization.query.all()
     organizations_schema = OrganizationSchema(many=True)
     result = organizations_schema.dump(organizations)
     return jsonify(result=result,
                    success=True)
 
-
 @app.route('/organization/<org_id>/events/published', methods=['GET'])
 def get_all_published_events(org_id):
-    """
-    Show all published events of an events
-    ---
-        tags:
-          - event
-        response:
-            200:
-                description: OK
-                content:
-                    application/json:
-                        schema:
-                            type: object
-                            properties:
-                                success:
-                                    type: boolean
-                                result:
-                                    type: array
-                                    items:
-                                        type: object
-                                        properties:
-                                            categories:
-                                                type: string
-                                            contact_id:
-                                                type: string
-                                            creator_id:
-                                                type: string
-                                            end_date:
-                                                type: string
-                                            event_id:
-                                                type: string
-                                            event_name:
-                                                type: string
-                                            info:
-                                                type: string
-                                            organization_id:
-                                                type: string
-                                            perks:
-                                                type: string
-                                            phase:
-                                                type: integer
-                                            start_date:
-                                                type: string
-                                            theme:
-                                                type: string
-    """
+    """ Return a specific organization by its ID """
     # Verify the organize exists.
     organization = Organization.query.filter_by(organization_id=org_id).first()
-    if organization is None:
+    if organization:
+        events = db.session.query(Event).filter((Event.organization_id == organization.organization_id),
+                                                 Event.phase == EventPhase.APPROVED).all()
+        events_schema = EventSchema(many=True)
+        result = events_schema.dump(events)
+        #result = EventSchema.dump(events, many=True)
+        return jsonify(result=result,
+                   success=True)
+    else:
         return jsonify(success=False,
                        message="The organization does not exists.")
-    else:
-        events = db.session.query(Event).filter((Event.organization_id == organization.organization_id),
-                                                Event.phase == EventPhase.APPROVED).all()
-        if events is None:
-            return jsonify(success=False,
-                           message="The organization does not have any events.")
-        else:
-            events_schema = EventSchema(many=True)
-            result = events_schema.dump(events)
-            return jsonify(result=result,
-                           success=True)
-
 
 @app.route('/organization/details/<path:org_id>', methods=['GET'])
 def get_org_info(org_id):
-    """
-    Show an organization's details
-    ---
-    tags:
-      - event
-    response:
-        200:
-            description: OK
-            content:
-                application/json:
-                    schema:
-                        type: object
-                        properties:
-                            board:
-                                type: array
-                                item:
-                                    type: object
-                                    properties:
-                                        name:
-                                            type: string
-                                        role:
-                                            type: string
-                                        user_id:
-                                            type: string
-                            categories:
-                                type: string
-                            org_name:
-                                type: string
-                            organization_id:
-                                type: string
-                            success:
-                                type: boolean
-    """
+    """ Return a specific organization by its ID """
     # Verify the organize exists.
     organization = Organization.query.filter_by(organization_id=org_id).first()
     if not organization or organization is None:
@@ -182,7 +73,7 @@ def get_org_info(org_id):
 def get_all_member(org_id):
     sessionObj = request.session
     # only user in an organization can see all members.
-    is_in_org = db.session.query(Role).filter(Role.user_id == sessionObj.user_id).all()
+    is_in_org = db.session.query(Role).filter(Role.user_id == sessionObj.user_id ).all()
 
     if is_in_org is None:
         return jsonify(message='You are not member of this organization', success=False)
@@ -205,60 +96,6 @@ def get_all_member(org_id):
 @app.route('/organization/add', methods=['POST'])
 @requires_auth
 def add_org():
-    """
-    Create a new organization
-    ---
-    tags:
-        organization
-    parameter:
-        - in: body
-            name: organization
-            description: new organization
-            require: true
-            schema:
-                type: object
-                required:
-                    - org_name
-                    - categories
-                    - contact
-                properties:
-                    org_name:
-                        type: string
-                    categories:
-                        type: string
-                    contact:
-                        type: object
-                        required:
-                            - address
-                            - state
-                            - zipcode
-                            - country
-                            - dob
-                        properties:
-                            address:
-                                type: string
-                            state:
-                                type: string
-                            zipcode
-                                type: integer
-                            country:
-                                type: string
-                            dob:
-                                type: string
-                                description: An ISO 8601 formatted datetime string
-    response:
-        200:
-            description: OK
-            content:
-                application/json:
-                    schema:
-                        type: object
-                        properties:
-                            success:
-                                type: boolean
-                            message:
-                                type: string
-    """
     sessionObj = request.session
 
     input_data = request.json
@@ -270,45 +107,116 @@ def add_org():
     if exist_name:
         return jsonify(message='This name is already taken. Please choose another name.', success=False)
     else:
+        # New contact for the organization
         org_contact = Contact(**contact_data)
 
+        # Create new organization
         new_org = Organization(org_name=org_name,
                                categories=categories,
                                contact=org_contact)
 
+        # Create chairman for the organization
         chairman = Role(user_id=sessionObj.user_id,
                         organization=new_org,
                         role=Roles.CHAIRMAN)
-        # organizations_schema = OrganizationSchema()
+        organizations_schema = OrganizationSchema()
         db.session.add(new_org)
         db.session.add(chairman)
         db.session.commit()
-        result = {'message': org_name + " is created",
+        result = {'message': organizations_schema.dump(new_org),
                   'success': True}
         return jsonify(result)
+
+
+@app.route('/organization/edit/<path:org_id>', methods=['PUT'])
+@requires_auth
+def edit_org(org_id):
+    organization = Organization.query.filter_by(organization_id=org_id).first()
+    if organization:
+        sessionObj = request.session
+
+        current_role = Role.query.filter_by(organization_id=org_id, user_id=sessionObj.user_id).first()
+        if current_role.role == Roles.CHAIRMAN:  
+            input_data = request.json
+            org_name_data = input_data['org_name']
+            categories_data = input_data['categories']
+            exist_name = Organization.query.filter_by(org_name=org_name_data).first()
+            if exist_name:
+                return jsonify(message='This name is already taken. Please choose another name.', success=False)
+            else:
+                organization.org_name = org_name_data
+                organization.categories = categories_data
+                db.session.commit()
+
+                organizations_schema = OrganizationSchema()
+                result = {'message': organizations_schema.dump(organization),
+                    'success': True}
+                return jsonify(result)
+        else:
+            return jsonify(success=False,
+                           message="You are not a chairman.")
+    else:
+        return jsonify(success=False,
+                       message="The organization does not exists.")
+
+
+@app.route('/organization/edit/contact/<path:org_id>', methods=['PUT'])
+@requires_auth
+def edit_contact(org_id):
+    organization = Organization.query.filter_by(organization_id=org_id).first()
+    if organization:
+        sessionObj = request.session
+
+        current_role = Role.query.filter_by(organization_id=org_id, user_id=sessionObj.user_id).first()
+        if current_role.role == Roles.CHAIRMAN:  
+            input_data = request.json
+            dob_data = input_data['dob']
+            phone_data = input_data['phone']
+            address_data = input_data['address']
+            state_data = input_data['state']
+            zipcode_data = input_data['zipcode']
+            country_data = input_data['country']
+
+            contact = Contact.query.filter_by(contact_id=organization.contact_id).first()
+
+            # You can simply this if you want I don't want to
+
+            if dob_data != '':
+                contact.dob=dob_data
+
+            if phone_data != '':
+                contact.phone=phone_data
+
+            if address_data != '':
+                contact.address=address_data
+
+            if state_data != '':
+                contact.state=state_data
+
+            if zipcode_data != '':
+                contact.zipcode=zipcode_data
+
+            if country_data != '':
+                contact.country=country_data
+ 
+            db.session.commit()
+
+            contact_schema = ContactSchema()
+            result = {'message': contact_schema.dump(contact),
+                  'success': True}
+            return jsonify(result)
+        else:
+            return jsonify(success=False,
+                           message="You are not a chairman.")
+    else:
+        return jsonify(success=False,
+                       message="The organization does not exists.")
 
 
 @app.route('/organization/register/<path:org_id>', methods=['POST'])
 @requires_auth
 def register_org(org_id):
-    """
-    Register an organization.
-    ---
-    tags:
-        - organization
-    response:
-        200:
-            description: OK
-            content:
-                application/json:
-                    schema:
-                        type: object
-                        properties:
-                            success:
-                                type: boolean
-                            message:
-                                type: string
-    """
+    """ User register for a organization"""
     organization = Organization.query.filter_by(organization_id=org_id).first()
     if organization is None:
         return jsonify(success=False,
@@ -333,35 +241,7 @@ def register_org(org_id):
 @app.route('/organization/resign/<path:org_id>', methods=['DELETE'])
 @requires_auth
 def unregister_org(org_id):
-    """
-    Unregister an organization or chairman resign
-    ---
-    tags:
-        - organization
-    parameter:
-        - in: body
-            name: email
-            description: required if the user is Chairman
-            required: false
-            schema:
-                required:
-                    - email
-                properties:
-                    email:
-                        type: string
-    response:
-        200:
-            description: OK
-            content:
-                application/json:
-                    schema:
-                        type: object
-                        properties:
-                            success:
-                                type: boolean
-                            message:
-                                type: string
-    """
+    """ Resign admin/chairman """
     # Verified the organization id existed or not
     organization = Organization.query.filter_by(organization_id=org_id).first()
     if organization is None:
@@ -377,14 +257,12 @@ def unregister_org(org_id):
             return jsonify(success=False,
                            message="You are not member of this organization.")
         else:
+            # Check if the user is chairman or admin.
             if current_role.role == Roles.CHAIRMAN:
-                # new_role_email = request.form.get('email')
-                input_data = request.json
-                new_role_email = input_data['email']
+                # Resign chairman by enter new chairman's email.
+                new_role_email = request.form.get('email')
                 new_role = User.query.filter_by(email=new_role_email).first()
-                if new_role is None:
-                    return jsonify(success=False,
-                                   message="The email doesn't exist.")
+                # Assign new chairman to the organization.
                 current_role.user = new_role
 
                 db.session.commit()
@@ -415,9 +293,9 @@ def get_managed_events(organization_id):
                 'phase': managed.phase.name
             }
             managed_orgs.append(data)
-        return jsonify(
-            {'success': True, 'organization': org_name, 'message': 'Show all events managed by this organization',
-             'result': managed_orgs})
+        return jsonify({'success': True, 'organization': org_name, 'message': 'Show all events managed by this organization',
+                        'result': managed_orgs})
     else:
         return {'message': 'This organization has no registered events.',
                 'success': False}
+
