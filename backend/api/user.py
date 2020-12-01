@@ -303,6 +303,15 @@ def get_registered_events():
     for registered in register_obj:
         event_obj = db.session.query(Event).filter(Event.event_id == registered.event_id).first()
         data = {
+            'categories': event_obj.categories,
+            'contact_id': event_obj.contact_id,
+            'creator_id': event_obj.creator_id,
+            'start_date': event_obj.start_date,
+            'end_date': event_obj.end_date,
+            'perk': event_obj.perk,
+            'phase': event_obj.phase,
+            'info': event_obj.info,
+            'organization_id': event_obj.organization_id,
             'event_id': registered.event_id,
             'event_name': event_obj.event_name,
             'created_at': registered.created_at
@@ -317,7 +326,7 @@ def get_managed_organizations():
     user = request.user
     managed_obj = db.session.query(Role).filter(Role.user_id == user.user_id,
                                                 or_(Role.role == Roles.ADMIN, Role.role == Roles.CHAIRMAN)).all()
-    print (user.user_id)
+    print(user.user_id)
     print(managed_obj)
     managed_orgs = []
     if managed_obj:
