@@ -24,45 +24,45 @@ def get_all_published_event():
     ---
     tags:
       - event
-    response:
-        200:
-            description: OK
-            content:
-                application/json:
-                    schema:
-                        type: object
-                        properties:
-                            success:
-                                type: boolean
-                            result:
-                                type: array
-                                items:
-                                    type: object
-                                    properties:
-                                        categories:
-                                            type: string
-                                        contact_id:
-                                            type: string
-                                        creator_id:
-                                            type: string
-                                        end_date:
-                                            type: string
-                                        event_id:
-                                            type: string
-                                        event_name:
-                                            type: string
-                                        info:
-                                            type: string
-                                        organization_id:
-                                            type: string
-                                        perks:
-                                            type: string
-                                        phase:
-                                            type: integer
-                                        start_date:
-                                            type: string
-                                        theme:
-                                            type: string
+    responses:
+      200:
+        description: OK
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                result:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      categories:
+                        type: string
+                      contact_id:
+                        type: string
+                      creator_id:
+                        type: string
+                      end_date:
+                        type: string
+                      event_id:
+                        type: string
+                      event_name:
+                        type: string
+                      info:
+                        type: string
+                      organization_id:
+                        type: string
+                      perks:
+                        type: string
+                      phase:
+                        type: integer
+                      start_date:
+                        type: string
+                      theme:
+                        type: string
     """
     events = db.session.query(Event).filter(Event.phase == EventPhase.APPROVED).all()
     if events:
@@ -80,49 +80,49 @@ def get_all_published_event():
 @requires_auth
 def get_all_unpublished_event(org_id):
     """
-        Show all unpublished events by organization (only chairman and admin allow to see the list)
-        ---
-        tags:
-          - event
-        response:
-            200:
-                description: OK
-                content:
-                    application/json:
-                        schema:
-                            type: object
-                            properties:
-                                success:
-                                    type: boolean
-                                result:
-                                    type: array
-                                    items:
-                                        type: object
-                                        properties:
-                                            categories:
-                                                type: string
-                                            contact_id:
-                                                type: string
-                                            creator_id:
-                                                type: string
-                                            end_date:
-                                                type: string
-                                            event_id:
-                                                type: string
-                                            event_name:
-                                                type: string
-                                            info:
-                                                type: string
-                                            organization_id:
-                                                type: string
-                                            perks:
-                                                type: string
-                                            phase:
-                                                type: integer
-                                            start_date:
-                                                type: string
-                                            theme:
-                                                type: string
+    Show all unpublished events by organization (only chairman and admin allow to see the list)
+    ---
+    tags:
+      - event
+    responses:
+      200:
+        description: OK
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                result:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      categories:
+                        type: string
+                      contact_id:
+                        type: string
+                      creator_id:
+                        type: string
+                      end_date:
+                        type: string
+                      event_id:
+                        type: string
+                      event_name:
+                        type: string
+                      info:
+                        type: string
+                      organization_id:
+                        type: string
+                      perks:
+                        type: string
+                      phase:
+                        type: integer
+                      start_date:
+                        type: string
+                      theme:
+                        type: string
         """
     events = db.session.query(Event).filter(or_(Event.phase == EventPhase.INITIALIZED,
                                                 Event.phase == EventPhase.ARCHIVED),
@@ -211,22 +211,22 @@ def create_event(org_id):
 @requires_auth
 def delete_event(event_id):
     """
-        Delete an unpublished event.
-        ---
-        tags:
-            - events
-        response:
-            200:
-                description: OK
-                content:
-                application/json:
-                    schema:
-                        type: object
-                        properties:
-                            success:
-                                type: boolean
-                            message:
-                                type: string
+    Delete an unpublished event.
+    ---
+    tags:
+      - event
+    responses:
+      200:
+        description: OK
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                message:
+                  type: string
     """
     # Verified the organization id existed or not
     event = Event.query.filter_by(event_id=event_id).first()
@@ -290,31 +290,31 @@ def register_event(event_id):
 @requires_auth
 def get_all_participants(event_id):
     """
-        Show all participants of a specific event.
-        ---
-        tags:
-            - event
-        response:
-            200:
-                description: OK
-                content:
-                    application/json:
-                        schema:
-                            type: object
-                            properties:
-                                success:
-                                    type: boolean
-                                message:
-                                    type: string
-                                participants:
-                                    type: array
-                                    items:
-                                        type: object
-                                        properties:
-                                            name:
-                                                type: String
-                                            user_id:
-                                                type: string
+    Show all participants of a specific event.
+    ---
+    tags:
+      - event
+    responses:
+      200:
+        description: OK
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                message:
+                  type: string
+                participants:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      name:
+                        type: string
+                      user_id:
+                        type: string
     """
     registers = Registration.query.filter_by(event_id=event_id).all()
     if not registers or registers is None:
